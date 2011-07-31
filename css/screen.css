@@ -1,0 +1,8 @@
+/* General classes */
+.hidden { display: none; }
+.show { display: block; }
+.inline { display: inline; }
+
+.lfloat { float: left; }
+.rfloat { float: right; }
+.clear { clear: both; }
