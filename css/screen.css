@@ -6,3 +6,102 @@
 .lfloat { float: left; }
 .rfloat { float: right; }
 .clear { clear: both; }
+
+
+/* Global */
+body {
+  background: transparent url(../img/background.png) repeat-y left top;
+  margin-left: 0;
+}
+
+.rating .positive { color: #228B22; }
+.rating .negative { color: #CD2626; }
+.rating img {
+  height: 12px;
+  padding-left: 1px;
+  width: 9px;
+}
+
+
+/* Tabs */
+.ui-tabs-vertical.ui-tabs {
+  height: 100%;
+  padding-left: 0;
+  width: 100%;
+}
+.ui-tabs-vertical.ui-widget-content {
+  background: none;
+  border: 0px none;
+}
+.ui-tabs-vertical.ui-tabs .ui-tabs-nav {
+  border-right: 1px solid;
+  float: left;
+  padding: .2em .1em .2em 0;
+  width: 150px;
+}
+.ui-tabs-vertical .ui-tabs-nav.ui-widget-header {
+  background: none;
+  border: 0px none;
+  height: 100%;
+}
+.ui-tabs-vertical .ui-tabs-nav .ui-state-default.ui-state-active { background-color: white !important; }
+.ui-tabs-vertical .ui-tabs-nav .ui-state-default:hover { background-color: #4B67A1; }
+.ui-tabs .ui-state-hover a:hover { color: #1C94C4; }
+.ui-tabs .ui-state-hover.ui-state-active a:hover { color: #EB8F00; }
+.ui-tabs-vertical .ui-tabs-nav .ui-state-default {
+  background: none;
+  border: 0px none;
+}
+.ui-tabs-vertical .ui-tabs-nav li {
+  clear: left;
+  width: 100%;
+  border-right-width: 0 !important;
+  margin: 0 -1px .2em 0;
+  cursor: pointer;
+  cursor: hand;
+}
+.ui-tabs.ui-tabs-vertical .ui-tabs-nav li.ui-state-default a {
+  cursor: pointer;
+  cursor: hand;
+}
+.ui-tabs-vertical .ui-tabs-nav li a { display:block; }
+.ui-tabs-vertical .ui-tabs-nav li.ui-tabs-selected {
+  padding-bottom: 0;
+  padding-right: .1em;
+}
+.ui-tabs-vertical .ui-tabs-panel {
+  float: left;
+  padding: 1em;
+  padding-left: 0;
+}
+
+
+/* Buying */
+#tab_buying table {
+  border-spacing: 0px;
+  width: 50em;
+}
+#tab_buying th {
+  border-bottom: 1px solid gray;
+  border-left: 1px solid gray;
+  padding: 5px 10px;
+  text-align: left;
+  vertical-align: bottom;
+}
+#tab_buying th.img {
+  border-left: 0px none;
+  width: 48px;
+}
+#tab_buying th.name { width: 70%; }
+#tab_buying th.price { width: 10%; }
+#tab_buying th.rating { width: 20%; }
+#tab_buying td {
+  border-bottom: 1px solid #C0C0C0;
+  padding: 5px 10px;
+}
+#tab_buying tr.alt td { background-color: #EDEDED; }
+#tab_buying td img.img {
+  background-color: #F0F0F0;
+  border: 1px solid #C0C0C0;
+  padding: 5px;
+}

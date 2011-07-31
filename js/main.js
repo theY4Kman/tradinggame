@@ -15,12 +15,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require(["js/jquery-1.6.2.min.js", "js/jquery-ui-1.8.14.min.js"], jQueryInit);
+require(["js/jquery-1.6.2.min.js"], jQueryInit);
+
+function showBuyTabItems(items)
+{
+  $('#tab_buying').html($.tmpl('tab_buying', items));
+}
+
+////////////////////////////
+var items = {
+  items: [
+    { img: 'img/cupcake.jpg', name: 'Cupcake', price: 100, up: 10, down: 10 },
+    { img: 'img/cupcake.jpg', name: 'Cupcake', price: 200, up: 10, down: 10 }
+  ]
+};
 
 function jQueryInit()
 {
-  $(function()
+  require(["js/jquery-ui-1.8.14.min.js", "js/jquery.tmpl.min.js"], function ()
   {
-    $('#tabs').tabs();
+    $(function()
+    {
+      var tabs = $('#tabs').tabs().addClass('ui-tabs-vertical ui-helper-clearfix');
+      $('#tabs li').removeClass('ui-corner-top');
+      $('#tabs li').click(function() {
+        $('#tabs').tabs('select', ''+$(this).children().attr('href'));
+      });
+      
+      $.get('js/templates/tab_buying.htm', {}, function (data)
+      {
+        $.template('tab_buying', data);
+        $('#tab_buying').html($.tmpl('tab_buying'));
+        
+        //////////////////
+        showBuyTabItems(items);
+      });
+    });
   });
 }
