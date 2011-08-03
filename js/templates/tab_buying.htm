@@ -13,12 +13,12 @@
             <tr{{if $index % 2 == 1}} class="alt"{{/if}}>
               <td class="img">
                 <a name="${id}">
-                  <img src="${img}" height="48" width="48" class="img" />
+                  <img src="${item.img}" height="48" width="48" class="img" />
                 </a>
               </td>
-              <td class="name">${name}</td>
-              <td class="price">$${price}</td>
-              <td class="ratings"><span class="rating"><span class="positive">${seller.up}<img src="img/green_arrow.png" /></span> <span class="negative">${seller.down}<img src="img/red_arrow.png" /></span></span></td>
+              <td class="name">${item.name}</td>
+              <td class="price">$${parseFloat(price).toFixed(2)}</td>
+              <td class="ratings"><span class="rating"><span class="positive">${seller.ratings.pos}<img src="img/green_arrow.png" /></span> <span class="negative">${seller.ratings.neg}<img src="img/red_arrow.png" /></span></span></td>
             </tr>{{/each}}{{/if}}
           </tbody>
         </table>

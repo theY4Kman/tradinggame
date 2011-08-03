@@ -15,7 +15,7 @@ define(['js/microevent.js'], function () {
         'Joe': {id:'Joe', ratings:{pos: 10, neg:5}, priv:{defect_rate:0.6}},
         'Andrew': {id:'Andrew', ratings:{pos: 10, neg:5}, priv:{defect_rate:0.8}},
         'Zach': {id:'Zach', ratings:{pos: 10, neg:5}, priv:{defect_rate:0.0}},
-    }
+    };
 
     function newAuctionWorld() {
         var item = choice(items);
@@ -46,9 +46,25 @@ define(['js/microevent.js'], function () {
         }
         return randomString;
     }
+    
+    Object.size = function(obj) {
+        var size = 0, key;
+        for (key in obj) {
+            if (obj.hasOwnProperty(key)) size++;
+        }
+        return size;
+    };
 
     function choice(objs) {
-        return objs[Math.floor(Math.random()*objs.length)];
+        if (objs.length != undefined)
+            return objs[Math.floor(Math.random()*objs.length)];
+        else {
+            var idx = Math.floor(Math.random()*Object.size(objs));
+            var i = 0;
+            for (key in objs)
+                if (i++ == idx)
+                    return objs[key];
+        }
     }
     
 

@@ -21,12 +21,14 @@ var game = null;
 
 function showBuyTabItems(items)
 {
-    $('#tab_buying').html($.tmpl('tab_buying', items));
+    var vals = [];
+    $.each(items, function (k,v) { vals.push(v); });
+    $('#tab_buying').html($.tmpl('tab_buying', {items: vals}));
     $('table#items').css('height', $('table#items').height() + 'px');
     
     $('#tab_buying table#items td').click(function ()
     {
-        var id = parseInt($(this).parent().find('a').attr('name'));
+        var id = $(this).parent().find('a').attr('name');
         $('#buy_item').html($.tmpl('buy_item_page', { item: game.auctionsWorld[id] }));
         $('#buy_item').css('height', $('#buy_item').height() + 'px');
         
@@ -65,8 +67,6 @@ function jQueryInit()
             $.get('js/templates/tab_buying.htm', {}, function (data)
             {
                 $.template('tab_buying', data);
-                $('#tab_buying').html($.tmpl('tab_buying'));
-                
                 $.get('js/templates/buy_item_page.htm', {}, function (data)
                 {
                     $.template('buy_item_page', data);
