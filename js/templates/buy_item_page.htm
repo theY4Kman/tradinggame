@@ -1,0 +1,14 @@
+        <div>
+          <a href="javascript:void(0);" class="back">Back to Item List</a>
+          <div class="clear">&nbsp;</div>
+          <img src="${item.img}" class="img" />
+          <div class="details">
+            <h2>${item.name}</h2>
+            <h3>$${item.price}</h3>
+            <span class="soldby">Sold by</span>
+            <br />
+            <span class="seller">${item.seller.name}</span> (<span class="rating"><span class="positive">${item.seller.up}<img src="img/green_arrow.png" /></span> <span class="negative">${item.seller.down}<img src="img/red_arrow.png" /></span></span>)
+          </div>
+          <div class="confirm ui-corner-bottom ui-corner-top">Buy</div>
+          <div class="clear">&nbsp;</div>
+        </div>
