@@ -145,8 +145,8 @@ body {
 }
 
 
-/* Selling */
-#tab_selling .item {
+/* Inventory */
+#tab_inventory .item {
   background-color: #F0F0F0;
   border: 1px solid #B0B0B0;
   float: left;
@@ -155,7 +155,7 @@ body {
   text-align: center;
   width: 128px;
 }
-#tab_selling .item img {
+#tab_inventory .item img {
   height: 128px;
   width: 128px;
 }

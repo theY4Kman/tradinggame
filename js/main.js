@@ -49,11 +49,11 @@ function showBuyTabItems(items)
     });
 }
 
-function showSellTabItems(items)
+function showInventoryTabItems(items)
 {
     var vals = [];
     $.each(items, function (k,v) { vals.push(v); });
-    $('#tab_selling').html($.tmpl('tab_selling', {items: vals}));
+    $('#tab_inventory').html($.tmpl('tab_inventory', {items: vals}));
 }
 
 function jQueryInit()
@@ -81,10 +81,10 @@ function jQueryInit()
                 });
             });
             
-            $.get('js/templates/tab_selling.htm', {}, function (data)
+            $.get('js/templates/tab_inventory.htm', {}, function (data)
             {
-                $.template('tab_selling', data);
-                showSellTabItems(game.auctionsWorld);
+                $.template('tab_inventory', data);
+                showInventoryTabItems(game.auctionsWorld);
             });
         });
     });
