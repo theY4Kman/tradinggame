@@ -11,6 +11,7 @@ define(['js/microevent.js'], function () {
         {img: 'img/car.jpg', name: 'Car', value: 12000.0},
         {img: 'img/ps3.jpg', name: 'PS3', value: 500.0},
     ];
+
     var sellers = {
         'Joe': {id:'Joe', ratings:{pos: 10, neg:5}, priv:{defect_rate:0.6}},
         'Andrew': {id:'Andrew', ratings:{pos: 10, neg:5}, priv:{defect_rate:0.8}},
@@ -21,7 +22,6 @@ define(['js/microevent.js'], function () {
         // Create a clone of an item with a unique key
         var item = Object.create(choice(items));
         item.id = randomString(20);
-
         var seller = choice(sellers);
         // fixme: add either A) a normal distribution here, 
         // or B) a sampling based on a buy/sell volume curve
@@ -37,9 +37,6 @@ define(['js/microevent.js'], function () {
         return auction;
     };
 
-    function populate() {
-    };
-
     function randomString(len, charSet) {
         charSet = charSet || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         var randomString = '';
@@ -49,12 +46,27 @@ define(['js/microevent.js'], function () {
         }
         return randomString;
     }
+    
+    Object.size = function(obj) {
+        var size = 0, key;
+        for (key in obj) {
+            if (obj.hasOwnProperty(key)) size++;
+        }
+        return size;
+    };
 
     function choice(objs) {
-        return objs[Math.floor(Math.random()*objs.length)];
+        if (objs.length != undefined)
+            return objs[Math.floor(Math.random()*objs.length)];
+        else {
+            var idx = Math.floor(Math.random()*Object.size(objs));
+            var i = 0;
+            for (key in objs)
+                if (i++ == idx)
+                    return objs[key];
+        }
     }
     
-
     // Game object
     function Game(){
         this.inventory = {};
@@ -95,4 +107,4 @@ define(['js/microevent.js'], function () {
 
     MicroEvent.mixin(Game);
     return new Game();
-})
+});

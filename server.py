@@ -1,5 +1,6 @@
 import flask
 from werkzeug import SharedDataMiddleware
+from gevent.wsgi import WSGIServer
 
 app = flask.Flask('Trading Game')
 
@@ -11,4 +12,5 @@ app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
   '/': '.'
 })
 app.debug = True
-app.run()
+http_server = WSGIServer(('localhost', 5000), app)
+http_server.serve_forever()
