@@ -17,18 +17,42 @@
 
 require(["js/jquery-1.6.2.min.js"], jQueryInit);
 
+////////////////////////////
+var items = [
+  { id: 0, img: 'img/cupcake.jpg', name: 'Cupcake', price: 100, seller: { name: 'ButtMuffin', up: 10, down: 10 } },
+  { id: 1, img: 'img/cupcake.jpg', name: 'Cupcake', price: 200, seller: { name: 'TheMuffinMan', up: 10, down: 10 } }
+];
+
+var item_db = {
+  0: items[0],
+  1: items[1]
+};
+
 function showBuyTabItems(items)
 {
   $('#tab_buying').html($.tmpl('tab_buying', items));
+  $('table#items').css('height', $('table#items').height() + 'px');
+  
+  $('#tab_buying table#items td').click(function ()
+  {
+    var id = parseInt($(this).parent().find('a').attr('name'));
+    $('#buy_item').html($.tmpl('buy_item_page', { item: item_db[id] }));
+    $('#buy_item').css('height', $('#buy_item').height() + 'px');
+    
+    $('#buy_item a.back').click(function ()
+    {
+      $('#buy_item').hide('slide', { direction: 'up' }, function ()
+      {
+        $('table#items').show('slide', { direction: 'down' });
+      });
+    });
+    
+    $('table#items').hide('slide', { direction: 'down' }, function ()
+    {
+      $('#buy_item').show('slide', { direction: 'up' });
+    });
+  });
 }
-
-////////////////////////////
-var items = {
-  items: [
-    { img: 'img/cupcake.jpg', name: 'Cupcake', price: 100, up: 10, down: 10 },
-    { img: 'img/cupcake.jpg', name: 'Cupcake', price: 200, up: 10, down: 10 }
-  ]
-};
 
 function jQueryInit()
 {
@@ -47,8 +71,13 @@ function jQueryInit()
         $.template('tab_buying', data);
         $('#tab_buying').html($.tmpl('tab_buying'));
         
-        //////////////////
-        showBuyTabItems(items);
+        $.get('js/templates/buy_item_page.htm', {}, function (data)
+        {
+          $.template('buy_item_page', data);
+        
+          //////////////////
+          showBuyTabItems({items: items});
+        });
       });
     });
   });
