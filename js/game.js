@@ -110,7 +110,6 @@ define(['js/microevent.js'], function () {
         // the market
         this.inventory[item.id] = item;
         this.wallet -= auction.price;
-
         this.trigger('ItemBought', auction);
         this.trigger('InventoryItemAdded', item);
         this.trigger('WalletChanged', {'from':this.wallet+auction.price, 'to':this.wallet});

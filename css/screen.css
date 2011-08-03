@@ -52,17 +52,18 @@ body {
   background: none;
   border: 0px none;
 }
-.ui-tabs-vertical .ui-tabs-nav li {
+.ui-tabs-vertical .ui-tabs-nav li.ui-state-default {
   clear: left;
   width: 100%;
   border-right-width: 0 !important;
-  margin: 0 -1px .2em 0;
+  margin: 0 -1px 0 0;
   cursor: pointer;
   cursor: hand;
 }
 .ui-tabs.ui-tabs-vertical .ui-tabs-nav li.ui-state-default a {
   cursor: pointer;
   cursor: hand;
+  float: right;
 }
 .ui-tabs-vertical .ui-tabs-nav li a { display:block; }
 .ui-tabs-vertical .ui-tabs-nav li.ui-tabs-selected {
@@ -73,6 +74,21 @@ body {
   float: left;
   padding: 1em;
   padding-left: 0;
+}
+
+/* Wallet */
+#wallet {
+  background-color: #4B67A1;
+  font-size: 0.6em;
+  margin-left: 1em;
+  margin-top: 2em;
+  padding: 1em 10px;
+  text-align: center;
+  width: 110px;
+}
+#wallet span {
+  color: #76EE00;
+  font-size: 1.2em;
 }
 
 
@@ -142,4 +158,20 @@ body {
   background-color: #F0F0F0;
   cursor: pointer;
   cursor: hand;
+}
+
+
+/* Inventory */
+#tab_inventory .item {
+  background-color: #F0F0F0;
+  border: 1px solid #B0B0B0;
+  float: left;
+  margin-left: 0.5em;
+  padding: 0.3em;
+  text-align: center;
+  width: 128px;
+}
+#tab_inventory .item img {
+  height: 128px;
+  width: 128px;
 }
