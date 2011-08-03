@@ -49,6 +49,13 @@ function showBuyTabItems(items)
     });
 }
 
+function showSellTabItems(items)
+{
+    var vals = [];
+    $.each(items, function (k,v) { vals.push(v); });
+    $('#tab_selling').html($.tmpl('tab_selling', {items: vals}));
+}
+
 function jQueryInit()
 {
     game = require('game');
@@ -72,6 +79,12 @@ function jQueryInit()
                     $.template('buy_item_page', data);
                     showBuyTabItems(game.auctionsWorld);
                 });
+            });
+            
+            $.get('js/templates/tab_selling.htm', {}, function (data)
+            {
+                $.template('tab_selling', data);
+                showSellTabItems(game.auctionsWorld);
             });
         });
     });
