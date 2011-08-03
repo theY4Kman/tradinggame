@@ -11,14 +11,17 @@ define(['js/microevent.js'], function () {
         {img: 'img/car.jpg', name: 'Car', value: 12000.0},
         {img: 'img/ps3.jpg', name: 'PS3', value: 500.0},
     ];
+
     var sellers = {
         'Joe': {id:'Joe', ratings:{pos: 10, neg:5}, priv:{defect_rate:0.6}},
         'Andrew': {id:'Andrew', ratings:{pos: 10, neg:5}, priv:{defect_rate:0.8}},
         'Zach': {id:'Zach', ratings:{pos: 10, neg:5}, priv:{defect_rate:0.0}},
-    };
+    }
 
     function newAuctionWorld() {
-        var item = choice(items);
+        // Create a clone of an item with a unique key
+        var item = Object.create(choice(items));
+        item.id = randomString(20);
         var seller = choice(sellers);
         // fixme: add either A) a normal distribution here, 
         // or B) a sampling based on a buy/sell volume curve
@@ -32,9 +35,6 @@ define(['js/microevent.js'], function () {
             time: new Date().getTime(),
         }
         return auction;
-    };
-
-    function populate() {
     };
 
     function randomString(len, charSet) {
@@ -67,15 +67,16 @@ define(['js/microevent.js'], function () {
         }
     }
     
-
     // Game object
     function Game(){
         this.inventory = {};
         this.auctionsWorld = {};
         this.auctionsMine = {};
         this.timestamp = new Date().getTime();
+        this.wallet = 100.0;
     }
 
+    // Call this to populate the buyable items with some initial things
     Game.prototype.populate = function () {
         var n_auctions = 10;
         for (var i = 0; i < n_auctions; i++) {
@@ -83,6 +84,25 @@ define(['js/microevent.js'], function () {
             this.auctionsWorld[auction.id] = auction;
             this.trigger('AuctionAdded', auction);
         }
+    }
+
+    Game.prototype.buyItem = function (id) {
+        if (!id in this.auctionsWorld) throw "No such auction";
+        var auction = this.auctionsWorld[id];
+        var item = auction.item;
+        if (auction.price > this.wallet) throw "Not enough money";
+
+        this.inventory[item.id] = item;
+        this.wallet -= auction.price;
+        function ItemBoughtEvent(obj) {
+            this.price = auction.price;
+            this.item = auction.item;
+            this.newbalance = obj.wallet;
+        }
+        console.info(new ItemBoughtEvent(this));
+        this.trigger('ItemBought', auction);
+        this.trigger('InventoryItemAdded', item);
+        this.trigger('WalletChanged', {'from':this.wallet+auction.price, 'to':this.wallet});
     }
 
     MicroEvent.mixin(Game);
