@@ -28,10 +28,14 @@ function showBuyTabItems(items)
 {
     var vals = [];
     $.each(items, function (k,v) { vals.push(v); });
-    $('#tab_buying').html($.tmpl('tab_buying', {items: vals}));
-    $('table#items').css('height', $('table#items').height() + 'px');
+    $('#tab_buying').html($.tmpl('auctions_list', {items: vals}));
+    $('#tab_buying table.auctions_list').css('height', $('#tab_buying table.auctions_list').height() + 'px');
     
-    $('#tab_buying table#items td').click(function ()
+    var buy_item = document.createElement('div');
+    buy_item.id = 'buy_item';
+    $('#tab_buying').prepend(buy_item);
+    
+    $('#tab_buying table.auctions_list td').click(function ()
     {
         var id = $(this).parent().find('a').attr('name');
         $('#buy_item').html($.tmpl('buy_item_page', { item: game.auctionsWorld[id] }));
@@ -49,12 +53,12 @@ function showBuyTabItems(items)
         {
             $('#buy_item').hide('slide', { direction: 'up' }, function ()
             {
-                $('table#items').show('slide', { direction: 'down' });
+                $('#tab_buying table.auctions_list').show('slide', { direction: 'down' });
             });
         });
         
         // Hide the table and show the buy item page
-        $('table#items').hide('slide', { direction: 'down' }, function ()
+        $('#tab_buying table.auctions_list').hide('slide', { direction: 'down' }, function ()
         {
             $('#buy_item').show('slide', { direction: 'up' });
         });
@@ -111,6 +115,13 @@ function showInventoryTabItems(items)
     });
 }
 
+function showSellTabItems(items)
+{
+    var vals = [];
+    $.each(items, function (k,v) { vals.push(v); });
+    $('#tab_selling').html($.tmpl('auctions_list', {items: vals}));
+}
+
 function updateWallet(amount)
 {
   $('#wallet span').html('$' + Math.floor(amount) + '.<span class="decimal">' +
@@ -121,6 +132,9 @@ function jQueryInit()
 {
     game = require('game');
     game.populate();
+    
+    /*if (window.localStorage.game != undefined)
+        game.load();*/
     
     require(["js/jquery-ui-1.8.14.min.js", "js/jquery.tmpl.min.js", "js/jConf-1.2.0.js"], function ()
     {
@@ -139,9 +153,11 @@ function jQueryInit()
               updateWallet(evt.to);
             });
             
-            $.get('js/templates/tab_buying.htm', {}, function (data)
+            $.get('js/templates/auctions_list.htm', {}, function (data)
             {
-                $.template('tab_buying', data);
+                $.template('auctions_list', data);
+                showSellTabItems(game.auctionsMine);
+                
                 $.get('js/templates/buy_item_page.htm', {}, function (data)
                 {
                     $.template('buy_item_page', data);
@@ -150,6 +166,16 @@ function jQueryInit()
                     game.bind('AuctionAdded', function (item)
                     {
                         showBuyTabItems(game.auctionsWorld);
+                        showSellTabItems(game.auctionsMine);
+                    });
+                    game.bind('ItemBought', function (item)
+                    {
+                        showBuyTabItems(game.auctionsWorld);
+                        $('#tab_buying a.back').click();
+                    });
+                    game.bind('AuctionSold', function (item)
+                    {
+                        showSellTabItems(game.auctionsMine);
                     });
                 });
             });
@@ -166,8 +192,17 @@ function jQueryInit()
                     {
                       showInventoryTabItems(game.inventory);
                     });
+                    game.bind('InventoryItemRemoved', function (item)
+                    {
+                      showInventoryTabItems(game.inventory);
+                    });
                 });
             });
         });
+    });
+    
+    $(window).unload(function ()
+    {
+        game.save();
     });
 }

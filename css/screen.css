@@ -93,38 +93,39 @@ body {
 #wallet #wallet_amount span.decimal { font-style: italic; }
 
 
-/* Buying */
-#tab_buying table {
+/* Auction List */
+table.auctions_list {
   border-spacing: 0px;
   width: 50em;
 }
-#tab_buying th {
+.auctions_list th {
   border-bottom: 1px solid gray;
   border-left: 1px solid gray;
   padding: 5px 10px;
   text-align: left;
   vertical-align: bottom;
 }
-#tab_buying th.img {
+.auctions_list th.img {
   border-left: 0px none;
   width: 48px;
 }
-#tab_buying th.name { width: 70%; }
-#tab_buying th.price { width: 10%; }
-#tab_buying th.rating { width: 20%; }
-#tab_buying td {
+.auctions_list th.name { width: 70%; }
+.auctions_list th.price { width: 10%; }
+.auctions_list th.rating { width: 20%; }
+.auctions_list td {
   border-bottom: 1px solid #C0C0C0;
   padding: 5px 10px;
 }
-#tab_buying tr.alt td { background-color: #EDEDED; }
-#tab_buying td.price { text-align: right; }
-
-#tab_buying img.img {
+.auctions_list tr.alt td { background-color: #EDEDED; }
+.auctions_list td.price { text-align: right; }
+.auctions_list img.img {
   background-color: #F0F0F0;
   border: 1px solid #C0C0C0;
   padding: 5px;
 }
 
+
+/* Buying */
 #tab_buying #buy_item { display: none; }
 #tab_buying #buy_item img.img {
   float: left;
