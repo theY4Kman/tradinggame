@@ -86,10 +86,11 @@ body {
   text-align: center;
   width: 110px;
 }
-#wallet span {
+#wallet #wallet_amount {
   color: #76EE00;
   font-size: 1.2em;
 }
+#wallet #wallet_amount span.decimal { font-style: italic; }
 
 
 /* Buying */
@@ -174,4 +175,26 @@ body {
 #tab_inventory .item img {
   height: 128px;
   width: 128px;
+}
+#tab_inventory .item:hover {
+  background-color: #C0C0C0;
+  cursor: pointer;
+  cursor: hand;
+}
+
+#create_auction img.img {
+  background-color: #F0F0F0;
+  border: 1px solid #B0B0B0;
+  float: left;
+  height: 128px;
+  padding: 0.3em;
+  width: 128px;
+}
+#create_auction  .form {
+  float: left;
+  margin-left: 2em;
+}
+#create_auction  .form input {
+  text-align: right;
+  width: 4em;
 }

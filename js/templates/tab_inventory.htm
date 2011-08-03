@@ -1,6 +1,6 @@
         {{each items}}{{if $index > 0 && $index % 4 == 0}}
         <div class="clear">&nbsp;</div>{{/if}}<div class="item">
-          <img src="${item.img}" />
-          <div class="name">${item.name}</div>
+          <a name="${id}"><img src="${img}" /></a>
+          <div class="name">${name}</div>
         </div>
         {{/each}}

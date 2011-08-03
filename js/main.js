@@ -61,6 +61,41 @@ function showInventoryTabItems(items)
     var vals = [];
     $.each(items, function (k,v) { vals.push(v); });
     $('#tab_inventory').html($.tmpl('tab_inventory', {items: vals}));
+    
+    $('#tab_inventory .item').click(function ()
+    {
+      var id = $(this).find('a[name]').attr('name');
+      if ($('#create_auction a[name]').attr('name') != id)
+      {
+          $('#create_auction').remove();
+          $.tmpl('create_auction_dialog', {item: game.inventory[id]}).appendTo('body');
+      }
+      
+      $('#create_auction').dialog({
+        modal: true,
+        resizable: false,
+        draggable: false,
+        width: '500px',
+        buttons: [
+          {
+            text: 'Create',
+            click: function ()
+            {
+            }
+          },
+          {
+            text: 'Cancel',
+            click: function () { $(this).dialog('close'); }
+          }
+        ]
+      });
+    });
+}
+
+function updateWallet(amount)
+{
+  $('#wallet span').html('$' + Math.floor(amount) + '.<span class="decimal">' +
+      (amount % 1).toFixed(2).substring(2) + '');
 }
 
 function jQueryInit()
@@ -79,10 +114,10 @@ function jQueryInit()
             });
             
             // Update wallet display
-            $('#wallet span').html('$' + game.wallet.toFixed(2));
+            updateWallet(game.wallet);
             game.bind('WalletChanged', function (evt)
             {
-              $('#wallet span').html('$' + evt.to.toFixed(2));
+              updateWallet(evt.to);
             });
             
             $.get('js/templates/tab_buying.htm', {}, function (data)
@@ -98,7 +133,16 @@ function jQueryInit()
             $.get('js/templates/tab_inventory.htm', {}, function (data)
             {
                 $.template('tab_inventory', data);
-                showInventoryTabItems(game.auctionsWorld);
+                $.get('js/templates/create_auction_dialog.htm', {}, function (data)
+                {
+                    $.template('create_auction_dialog', data);
+                    showInventoryTabItems(game.inventory);
+                    
+                    game.bind('InventoryItemAdded', function (item)
+                    {
+                      showInventoryTabItems(game.inventory);
+                    });
+                });
             });
         });
     });
