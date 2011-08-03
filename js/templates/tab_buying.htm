@@ -9,8 +9,9 @@
           </thead>
           <tbody>{{if items.length}}{{each items}}
             <tr{{if $index % 2 == 1}} class="alt"{{/if}}>
-              <td class="img"><img src="${ img }" height="48" width="48" class="img" /></td>
-              <td class="name">${name}</td>
+              <td class="img"><img src="${ item.img }" height="48" width="48" class="img" /></td>
+              <td class="name">${item.name}
+		<div style="font-style:oblique;font-size:70%">${id}</div></td>
               <td class="price">$${price}</td>
               <td class="ratings"><span class="rating"><span class="positive">${up}<img src="img/green_arrow.png" /></span> <span class="negative">${down}<img src="img/red_arrow.png" /></span></span></td>
             </tr>{{/each}}{{/if}}
