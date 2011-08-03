@@ -67,7 +67,7 @@ define(['js/microevent.js'], function () {
                     return objs[key];
         }
     }
-    
+
     // Game object
     function Game(){
         this.inventory = {};
@@ -93,6 +93,19 @@ define(['js/microevent.js'], function () {
                 var s = logtriggers[i];
                 game.bind(s, function (d) { console.info([s, JSON.stringify(d)]) });
             })(this);
+        }
+    }
+
+    Game.prototype.save = function () {
+        window.localStorage.game = JSON.stringify(this);
+    }
+
+    Game.prototype.load = function () {
+        var obj = JSON.parse(window.localStorage.game);
+        for (var k in obj) {
+            if (!obj.hasOwnProperty(k)) continue;
+            if (['_ticker', '_events'].indexOf(k) >= 0) continue; 
+            this[k] = obj[k];
         }
     }
 
