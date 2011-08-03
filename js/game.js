@@ -2,6 +2,7 @@
 define(['js/microevent.js'], function () {
     var config = {
         rate_newitems: 0.01, // 100 seconds per item?
+        rate_buy: 0.1, // FIXME this is a dumb parameter, replace with market model
     };
 
     var items = [
@@ -78,14 +79,46 @@ define(['js/microevent.js'], function () {
             'NymA': {id:'NymA', ratings:{pos: 1, neg:2}},
             'NymB': {id:'NymB', ratings:{pos: 1, neg:2}},
         }
+        var self = this;
+        this._ticker = setInterval(function () { self.trigger('tick'); }, 500);
+        this.bind('tick', this._tick);
 
         // Create some default logs
-        logtriggers = ['InventoryItemAdded', 'AuctionAdded', 'ItemBought'];
+        logtriggers = ['InventoryItemAdded', 
+                       'AuctionAdded', 
+                       'ItemBought',
+                       'AuctionSold'];
         for (var i in logtriggers) {
             (function (game) {
                 var s = logtriggers[i];
-                game.bind(s, function (d) { console.info([s, d]) });
+                game.bind(s, function (d) { console.info([s, JSON.stringify(d)]) });
             })(this);
+        }
+    }
+
+    Game.prototype._tick = function () {
+        // Tick logic
+        // For every auction the user has up for sale, maybe buy it
+        for (var id in this.auctionsMine) {
+            if (!this.auctionsMine.hasOwnProperty(id)) continue;
+            var auction = this.auctionsMine[id];
+            var item = auction.item;
+            if (!this.inventory.hasOwnProperty(item.id)) 
+                throw "Auction for item not in inventory";
+
+            // FIXME implement a dice roll based on the market properties,
+            // the item value, and the auction price
+            if (Math.random() < config.rate_buy) {
+                delete(this.inventory[item.id]);
+                delete(this.auctionsMine[auction.id]);
+                var oldwallet = this.wallet;
+                this.wallet += auction.price;
+                this.trigger('WalletChanged', {'from':oldwallet, 'to':this.wallet});
+                this.trigger('InventoryItemRemoved', auction.item);
+                this.trigger('AuctionSold', auction);
+                this.trigger('AuctionRemoved', auction);
+            }
+
         }
     }
 
@@ -109,18 +142,21 @@ define(['js/microevent.js'], function () {
         // FIXME add a delay so it doesn't immediately go to inventory, but simulates
         // the market
         this.inventory[item.id] = item;
+        delete(this.auctionsWorld[auction.id]);
+        var oldwallet = this.wallet;
         this.wallet -= auction.price;
+        this.trigger('AuctionRemoved', auction);
+        this.trigger('WalletChanged', {'from':oldwallet, 'to':this.wallet});
         this.trigger('ItemBought', auction);
         this.trigger('InventoryItemAdded', item);
-        this.trigger('WalletChanged', {'from':this.wallet+auction.price, 'to':this.wallet});
     }
-
 
     // Put an item up for sale
     Game.prototype.createAuction = function (id, price, nym) {
         if (!this.inventory.hasOwnProperty(id)) throw "Item not in inventory";
         var item = this.inventory[id];
-        if (item.auctionid) throw "Item is already for sale";
+        if (item.auctionid in this.auctionsMine) 
+            throw "Item is already for sale: " + JSON.stringify(item);
 
         // FIXME use the nym from the arguments
         var nym = choice(this.nyms);
@@ -139,9 +175,10 @@ define(['js/microevent.js'], function () {
 
     Game.prototype.testA = function() {
         // Buy something
-        this.buyItem(choice(this.auctionsWorld).id);
+        var auction = choice(this.auctionsWorld)
+        this.buyItem(auction.id);
         // Sell it right away at 10% markup
-        var item = choice(this.inventory);
+        var item = auction.item;
         this.createAuction(item.id, item.value * 1.1);
     }
 
