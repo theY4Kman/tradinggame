@@ -32,6 +32,13 @@ function showBuyTabItems(items)
         $('#buy_item').html($.tmpl('buy_item_page', { item: game.auctionsWorld[id] }));
         $('#buy_item').css('height', $('#buy_item').height() + 'px');
         
+        // The buy handler
+        $('#buy_item div.confirm').click(function ()
+        {
+          var id = $(this).parent().find('a[name]').attr('name');
+          game.buyItem(id);
+        });
+        
         // Add the back link handler
         $('#buy_item a.back').click(function ()
         {
@@ -69,6 +76,13 @@ function jQueryInit()
             $('#tabs li').removeClass('ui-corner-top');
             $('#tabs li').click(function() {
                 $('#tabs').tabs('select', ''+$(this).children().attr('href'));
+            });
+            
+            // Update wallet display
+            $('#wallet span').html('$' + game.wallet.toFixed(2));
+            game.bind('WalletChanged', function (evt)
+            {
+              $('#wallet span').html('$' + evt.to.toFixed(2));
             });
             
             $.get('js/templates/tab_buying.htm', {}, function (data)

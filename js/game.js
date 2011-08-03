@@ -94,11 +94,13 @@ define(['js/microevent.js'], function () {
 
         this.inventory[item.id] = item;
         this.wallet -= auction.price;
+        
         function ItemBoughtEvent(obj) {
             this.price = auction.price;
             this.item = auction.item;
             this.newbalance = obj.wallet;
         }
+        
         console.info(new ItemBoughtEvent(this));
         this.trigger('ItemBought', auction);
         this.trigger('InventoryItemAdded', item);
