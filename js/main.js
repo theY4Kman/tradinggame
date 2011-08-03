@@ -19,6 +19,11 @@ require(["js/jquery-1.6.2.min.js", "game"], jQueryInit);
 
 var game = null;
 
+function isFloat(str)
+{
+  return !isNaN(new Number(str));
+}
+
 function showBuyTabItems(items)
 {
     var vals = [];
@@ -79,8 +84,22 @@ function showInventoryTabItems(items)
         buttons: [
           {
             text: 'Create',
-            click: function ()
+            click: function (evt)
             {
+              var input = $(this).find('input').attr('value');
+              if (!isFloat(input))
+              {
+                  $(this).parent().find('button').first().jConf({
+                    sText: 'Please enter a valid price.',
+                    okBtn: 'Okay',
+                    evt: evt
+                  });
+                  return;
+              }
+              
+              var value = new Number(input);
+              game.createAuction(id, value, null);
+              $(this).dialog('close');
             }
           },
           {
@@ -103,7 +122,7 @@ function jQueryInit()
     game = require('game');
     game.populate();
     
-    require(["js/jquery-ui-1.8.14.min.js", "js/jquery.tmpl.min.js"], function ()
+    require(["js/jquery-ui-1.8.14.min.js", "js/jquery.tmpl.min.js", "js/jConf-1.2.0.js"], function ()
     {
         $(function()
         {
@@ -127,6 +146,11 @@ function jQueryInit()
                 {
                     $.template('buy_item_page', data);
                     showBuyTabItems(game.auctionsWorld);
+                    
+                    game.bind('AuctionAdded', function (item)
+                    {
+                        showBuyTabItems(game.auctionsWorld);
+                    });
                 });
             });
             
