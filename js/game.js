@@ -71,6 +71,7 @@ define(['js/microevent.js'], function () {
     // Game object
     function Game(){
         this.inventory = {};
+        this.boughtFor = {};
         this.auctionsWorld = {};
         this.auctionsMine = {};
         this.timestamp = new Date().getTime();
@@ -155,6 +156,7 @@ define(['js/microevent.js'], function () {
         // FIXME add a delay so it doesn't immediately go to inventory, but simulates
         // the market
         this.inventory[item.id] = item;
+        this.boughtFor[item.id] = auction.price;
         delete(this.auctionsWorld[auction.id]);
         var oldwallet = this.wallet;
         this.wallet -= auction.price;

@@ -77,40 +77,70 @@ function showInventoryTabItems(items)
       if ($('#create_auction a[name]').attr('name') != id)
       {
           $('#create_auction').remove();
-          $.tmpl('create_auction_dialog', {item: game.inventory[id]}).appendTo('body');
+          $.tmpl('create_auction_dialog', {
+            item: game.inventory[id],
+            boughtFor: game.boughtFor[id]
+          }).appendTo('body');
       }
       
-      $('#create_auction').dialog({
-        modal: true,
-        resizable: false,
-        draggable: false,
-        width: '500px',
-        buttons: [
+      var input = $('#create_auction input');
+      function changeNet()
+      {
+          function delayed()
           {
-            text: 'Create',
-            click: function (evt)
-            {
-              var input = $(this).find('input').attr('value');
-              if (!isFloat(input))
+              var amt = input.val();
+              if (!isFloat(amt))
+                  $(this).parent().find('span.netprofit').html('-');
+              else
               {
-                  $(this).parent().find('button').first().jConf({
-                    sText: 'Please enter a valid price.',
-                    okBtn: 'Okay',
-                    evt: evt
-                  });
-                  return;
+                  var entered = parseFloat(input.val());
+                  var delta = entered - game.boughtFor[id];
+                  input.parent().find('span.netprofit').html(((delta < 0) ? '-' : '') + '$' +
+                      Math.abs(delta).toFixed(2));
               }
-              
-              var value = new Number(input);
-              game.createAuction(id, value, null);
-              $(this).dialog('close');
-            }
-          },
-          {
-            text: 'Cancel',
-            click: function () { $(this).dialog('close'); }
           }
-        ]
+          
+          setTimeout(delayed, 10);
+      }
+      
+      $(document).keydown(changeNet);
+      $('#create_auction input').change(changeNet);
+      changeNet();
+      
+      $('#create_auction').dialog({
+          modal: true,
+          resizable: false,
+          draggable: false,
+          width: '500px',
+          buttons: [
+            {
+                text: 'Create',
+                click: function (evt)
+                {
+                    var input = $(this).find('input').val();
+                    if (!isFloat(input))
+                    {
+                        $(this).parent().find('button').first().jConf({
+                            sText: 'Please enter a valid price.',
+                            okBtn: 'Okay',
+                            evt: evt
+                        });
+                        return;
+                    }
+                    
+                    var value = new Number(input);
+                    game.createAuction(id, value, null);
+                    $(this).dialog('close');
+                }
+              },
+              {
+                  text: 'Cancel',
+                  click: function () {
+                      $(this).dialog('close');
+                      $(document).unbind('keydown', changeNet);
+                  }
+              }
+          ]
       });
     });
 }
@@ -124,8 +154,24 @@ function showSellTabItems(items)
 
 function updateWallet(amount)
 {
-  $('#wallet span').html('$' + Math.floor(amount) + '.<span class="decimal">' +
-      (amount % 1).toFixed(2).substring(2) + '');
+  var wallet_amount = $('#wallet #wallet_amount');
+  
+  // Add wrap hints (<wbr />) at every comma we add
+  var floor = Math.floor(amount).toString();
+  var rgx = /(\d+)(\d{3})/;
+  while (rgx.test(floor))
+      floor = floor.replace(rgx, '$1' + ',<wbr />' + '$2');
+  
+  wallet_amount.html('$' + floor + '.<span class="decimal">' +
+              (Math.floor(amount % 1 * 100)/100).toFixed(2).substring(2) + '</span>');
+  
+  var width = 0;
+  $.each($('#wallet').children(), function (k,v) { width += $(v).width(); })
+  
+  if (width > $('#wallet').width())
+      $('#wallet span.label').hide();
+  else
+      $('#wallet span.label').show();
 }
 
 function jQueryInit()

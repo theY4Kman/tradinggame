@@ -199,6 +199,7 @@ table.auctions_list {
   text-align: right;
   width: 4em;
 }
+#create_auction span.value { color: #76EE00; }
 
 
 /* jConf */
