@@ -64,6 +64,7 @@ function showBuyTabItems(items)
                       okBtn: 'Okay',
                       evt: evt
                   });
+              return;
           }
         });
         
@@ -159,6 +160,7 @@ function showInventoryTabItems(items)
                             okBtn: 'Okay',
                             evt: evt
                         });
+                        return;
                     }
                     $(this).dialog('close');
                     
@@ -220,6 +222,12 @@ function updateWallet(amount)
   $('#wallet').effect('highlight', {color: '#66DE00'}, 750);
 }
 
+function removeClearNotifications()
+{
+    if ($('#tab_select li.notification').not('.removing').not('#clear_notifications').length == 0)
+        $('#clear_notifications').slideUp(function () { $(this).remove(); });
+}
+
 /* `html` is the markup to put in the notification, and `tab` is the href minus
  * the pound sign of the tab to display if the player clicks on the notification
  */
@@ -229,7 +237,20 @@ function addNotification(html, tab)
     
     elem.addClass('notification ui-corner-all');
     if ($('#tab_select li.notification').length == 0)
+    {
+        var clear = $(document.createElement('li'));
+        clear.attr('id', 'clear_notifications');
+        clear.addClass('notification first hand ui-corner-all');
+        clear.css('font-weight', 'bold');
+        clear.html('Clear Notifications');
+        clear.click(function ()
+        {
+            $('li.notification').slideUp(function () { $(this).remove(); });
+        });
+        clear.appendTo('#tab_select');
+        
         elem.addClass('first');
+    }
     
     if (tab != undefined)
         elem.click(function ()
@@ -239,7 +260,9 @@ function addNotification(html, tab)
     
     elem.click(function ()
     {
-      elem.slideUp(function () { elem.remove(); });
+        elem.addClass('removing');
+        elem.slideUp(function () { elem.remove(); });
+        removeClearNotifications();
     });
     
     elem.html(html);
@@ -247,8 +270,10 @@ function addNotification(html, tab)
     elem.effect('highlight', {}, 1000);
     setTimeout(function ()
     {
+        elem.addClass('removing');
         elem.slideUp(function () { $(this).remove(); });
-    }, 5000);
+        removeClearNotifications();
+    }, 30000);
 }
 
 function jQueryInit()

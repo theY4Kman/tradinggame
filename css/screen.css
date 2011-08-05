@@ -7,6 +7,11 @@
 .rfloat { float: right; }
 .clear { clear: both; }
 
+.hand {
+  cursor: pointer;
+  cursor: hand;
+}
+
 .money { color: #76EE00; }
 .item_display { color: #D2691E; }
 
