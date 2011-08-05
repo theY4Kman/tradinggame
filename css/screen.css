@@ -93,6 +93,19 @@ body {
 #wallet #wallet_amount span.decimal { font-style: italic; }
 
 
+/* Notifications */
+.ui-tabs .ui-tabs-nav li.notification.first { margin-top: 2em; }
+.ui-tabs .ui-tabs-nav li.notification {
+  background-color: #4B67A1;
+  font-size: 0.6em;
+  margin-left: 1em;
+  margin-top: 1em;
+  padding: 1em 10px;
+  white-space: normal;
+  width: 110px;
+}
+
+
 /* Auction List */
 table.auctions_list {
   border-spacing: 0px;

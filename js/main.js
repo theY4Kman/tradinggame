@@ -156,11 +156,10 @@ function updateWallet(amount)
 {
   var wallet_amount = $('#wallet #wallet_amount');
   
-  // Add wrap hints (<wbr />) at every comma we add
   var floor = Math.floor(amount).toString();
   var rgx = /(\d+)(\d{3})/;
   while (rgx.test(floor))
-      floor = floor.replace(rgx, '$1' + ',<wbr />' + '$2');
+      floor = floor.replace(rgx, '$1' + ',' + '$2');
   
   wallet_amount.html('$' + floor + '.<span class="decimal">' +
               (Math.floor(amount % 1 * 100)/100).toFixed(2).substring(2) + '</span>');
@@ -172,6 +171,50 @@ function updateWallet(amount)
       $('#wallet span.label').hide();
   else
       $('#wallet span.label').show();
+  
+  width = 0;
+  $.each($('#wallet').children(), function (k,v) { width += $(v).width(); })
+  
+  if (width > $('#wallet').width())
+  {
+      // Add wrap hints (<wbr />) at every comma we add
+      var wbrs = floor.split(',').join(',<wbr />');
+      wallet_amount.html('$' + wbrs + '.<span class="decimal">' +
+                  (Math.floor(amount % 1 * 100)/100).toFixed(2).substring(2) + '</span>');
+  }
+  
+  $('#wallet').effect('highlight', {color: '#66DE00'}, 750);
+}
+
+/* `html` is the markup to put in the notification, and `tab` is the href minus
+ * the pound sign of the tab to display if the player clicks on the notification
+ */
+function addNotification(html, tab)
+{
+    var elem = $(document.createElement('li'));
+    
+    elem.addClass('notification ui-corner-all');
+    if ($('#tab_select li.notification').length == 0)
+        elem.addClass('first');
+    
+    if (tab != undefined)
+        elem.click(function ()
+        {
+            $('#tabs').tabs('select', tab);
+        });
+    
+    elem.click(function ()
+    {
+      elem.slideUp(function () { elem.remove(); });
+    });
+    
+    elem.html(html);
+    elem.appendTo('#tab_select');
+    elem.effect('highlight', {}, 1000);
+    setTimeout(function ()
+    {
+        elem.slideUp(function () { $(this).remove(); });
+    }, 5000);
 }
 
 function jQueryInit()
@@ -187,7 +230,7 @@ function jQueryInit()
         $(function()
         {
             var tabs = $('#tabs').tabs().addClass('ui-tabs-vertical ui-helper-clearfix');
-            $('#tabs li').removeClass('ui-corner-top');
+            $('#tabs li.ui-state-default').removeClass('ui-corner-top');
             $('#tabs li').click(function() {
                 $('#tabs').tabs('select', ''+$(this).children().attr('href'));
             });
