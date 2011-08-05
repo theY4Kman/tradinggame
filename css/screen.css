@@ -7,6 +7,9 @@
 .rfloat { float: right; }
 .clear { clear: both; }
 
+.money { color: #76EE00; }
+.item_display { color: #D2691E; }
+
 
 /* Global */
 body {

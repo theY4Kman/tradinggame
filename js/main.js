@@ -131,6 +131,10 @@ function showInventoryTabItems(items)
                     var value = new Number(input);
                     game.createAuction(id, value, null);
                     $(this).dialog('close');
+                    
+                    addNotification('Created auction for <span class="item_display">' +
+                        game.inventory[id].name + '</span> for <span class="money">$' +
+                        value.toFixed(2) + '</span>.', 'tab_selling');
                 }
               },
               {
@@ -257,14 +261,22 @@ function jQueryInit()
                         showBuyTabItems(game.auctionsWorld);
                         showSellTabItems(game.auctionsMine);
                     });
-                    game.bind('ItemBought', function (item)
+                    game.bind('ItemBought', function (auction)
                     {
                         showBuyTabItems(game.auctionsWorld);
                         $('#tab_buying a.back').click();
+                        
+                        addNotification('Bought <span class="item_display">' +
+                            auction.item.name + '</span> for <span class="money">$' +
+                            auction.price.toFixed(2) + '</span>.', 'tab_inventory');
                     });
-                    game.bind('AuctionSold', function (item)
+                    game.bind('AuctionSold', function (auction)
                     {
                         showSellTabItems(game.auctionsMine);
+                        
+                        addNotification('Sold <span class="item_display">' +
+                            auction.item.name + '</span> for <span class="money">$' +
+                            auction.price.toFixed(2) + '</span>.');
                     });
                 });
             });
