@@ -112,6 +112,7 @@ body {
   white-space: normal;
   width: 110px;
 }
+.ui-tabs .ui-tabs-nav li.notification:hover { background-color: #1874CD; }
 
 
 /* Auction List */
@@ -144,6 +145,30 @@ table.auctions_list {
   border: 1px solid #C0C0C0;
   padding: 5px;
 }
+
+
+/* Transactions log */
+table#transactions {
+  border-spacing: 0px;
+  width: 50em;
+}
+#transactions th {
+  border-bottom: 1px solid gray;
+  border-left: 1px solid gray;
+  padding: 5px 10px;
+  text-align: left;
+  vertical-align: bottom;
+}
+#transactions th.description { width: 70%; }
+#transactions th.net, #transactions th.rating { width: 15%; }
+#transactions td {
+  border-bottom: 1px solid #C0C0C0;
+  padding: 5px 10px;
+}
+#transactions td.net, #transactions td.balance { text-align: right }
+.net.negative { background-color: #C33; }
+.net.nochange { background-color: #FF0; }
+.net.positive { background-color: #238E23; }
 
 
 /* Buying */

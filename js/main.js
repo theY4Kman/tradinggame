@@ -167,6 +167,14 @@ function showInventoryTabItems(items)
                     addNotification('Created auction for <span class="item_display">' +
                         game.inventory[id].name + '</span> for <span class="money">$' +
                         value.toFixed(2) + '</span>.', 'tab_selling');
+                    
+                    addTransaction({
+                        description: 'Put <span class="item_display">' +
+                            game.inventory[id].name + '</span> up for auction at ' +
+                            '<span class="money">$' + value.toFixed(2) + '</span>.',
+                        net: 0.0,
+                        balance: game.wallet
+                    });
                 }
               },
               {
@@ -198,7 +206,7 @@ function updateWallet(amount)
       floor = floor.replace(rgx, '$1' + ',' + '$2');
   
   wallet_amount.html('$' + floor + '.<span class="decimal">' +
-              (Math.floor(amount % 1 * 100)/100).toFixed(2).substring(2) + '</span>');
+              (amount % 1).toFixed(2).substring(2) + '</span>');
   
   var width = 0;
   $.each($('#wallet').children(), function (k,v) { width += $(v).width(); })
@@ -216,7 +224,7 @@ function updateWallet(amount)
       // Add wrap hints (<wbr />) at every comma we add
       var wbrs = floor.split(',').join(',<wbr />');
       wallet_amount.html('$' + wbrs + '.<span class="decimal">' +
-                  (Math.floor(amount % 1 * 100)/100).toFixed(2).substring(2) + '</span>');
+                  (amount % 1).toFixed(2).substring(2) + '</span>');
   }
   
   $('#wallet').effect('highlight', {color: '#66DE00'}, 750);
@@ -276,6 +284,14 @@ function addNotification(html, tab)
     }, 30000);
 }
 
+var last_transaction_id = 0;
+/* `tr` should be a dictionary with three keys: description, net, and balance */
+function addTransaction(tr)
+{
+    tr['id'] = ++last_transaction_id;
+    $.tmpl('transaction', tr).appendTo('#transactions .list');
+}
+
 function jQueryInit()
 {
     game = require('game');
@@ -299,6 +315,38 @@ function jQueryInit()
             game.bind('WalletChanged', function (evt)
             {
               updateWallet(evt.to);
+            });
+            
+            $.get('js/templates/transaction.htm', {}, function (data)
+            {
+                $.template('transaction', data);
+                
+                // Initial transaction
+                addTransaction({
+                    description: 'Began game.',
+                    net: 0.0,
+                    balance: game.wallet
+                });
+                
+                // Setup the transactions log hooks
+                game.bind('ItemBought', function (auction)
+                {
+                    addTransaction({
+                        description: 'Bought <span class="item_display">' +
+                            auction.item.name + '</span>.',
+                        net: -auction.price,
+                        balance: game.wallet
+                    });
+                });
+                game.bind('AuctionSold', function (auction)
+                {
+                    addTransaction({
+                        description: 'Sold <span class="item_display">' +
+                            auction.item.name + '</span>.',
+                        net: auction.price,
+                        balance: game.wallet
+                    });
+                });
             });
             
             $.get('js/templates/auctions_list.htm', {}, function (data)
