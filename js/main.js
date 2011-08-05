@@ -42,10 +42,29 @@ function showBuyTabItems(items)
         $('#buy_item').css('height', $('#buy_item').height() + 'px');
         
         // The buy handler
-        $('#buy_item div.confirm').click(function ()
+        $('#buy_item div.confirm').click(function (evt)
         {
           var id = $(this).parent().find('a[name]').attr('name');
-          game.buyItem(id);
+          
+          try
+          {
+              game.buyItem(id);
+          }
+          catch (error)
+          {
+              if (error == 'Not enough money')
+                  $(this).jConf({
+                      sText: 'You don\'t have enough money to buy this item!',
+                      okBtn: 'Okay',
+                      evt: evt
+                  });
+              else
+                  $(this).jConf({
+                      sText: error,
+                      okBtn: 'Okay',
+                      evt: evt
+                  });
+          }
         });
         
         // Add the back link handler
@@ -129,7 +148,18 @@ function showInventoryTabItems(items)
                     }
                     
                     var value = new Number(input);
-                    game.createAuction(id, value, null);
+                    try
+                    {
+                        game.createAuction(id, value, null);
+                    }
+                    catch (error)
+                    {
+                        $(this).jConf({
+                            sText: error,
+                            okBtn: 'Okay',
+                            evt: evt
+                        });
+                    }
                     $(this).dialog('close');
                     
                     addNotification('Created auction for <span class="item_display">' +
