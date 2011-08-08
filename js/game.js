@@ -2,7 +2,7 @@
 define(['js/microevent.js'], function () {
     var config = {
         rate_newitems: 0.01, // 100 seconds per item?
-        rate_buy: 0.1, // FIXME this is a dumb parameter, replace with market model
+        rate_buy: 0.02, // FIXME this is a dumb parameter, replace with market model
     };
 
     var items = [
