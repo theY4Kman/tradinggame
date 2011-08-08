@@ -14,15 +14,27 @@
         <li><a href="#tab_selling"><span>Selling</span></a></li>
         <li><a href="#tab_inventory">Inventory</a></li>
         <li><a href="#tab_pseudonyms">Pseudonyms</a></li>
-        <li id="wallet">Wallet: <span id="wallet_amount">$0.<span class="decimal">00</span></span></li>
+        <li><a href="#tab_transactions">Transactions</a></li>
+        <li id="wallet" class="ui-corner-all"><span class="label">Wallet: </span><span id="wallet_amount">$0.<span class="decimal">00</span></span></li>
       </ul>
       <div id="tab_buying"></div>
       <div id="tab_selling"></div>
-      <div id="tab_inventory">
-        Inventory
-      </div>
+      <div id="tab_inventory"></div>
       <div id="tab_pseudonyms">
         Pseudonyms
+      </div>
+      <div id="tab_transactions">
+        <table id="transactions">
+          <thead>
+            <tr>
+              <th class="description">Description</th>
+              <th class="net">Net</th>
+              <th class="balance">Balance</th>
+            </tr>
+          </thead>
+          <tbody class="list">
+          </tbody>
+        </table>
       </div>
     </div>
   </body>

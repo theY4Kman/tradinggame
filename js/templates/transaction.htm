@@ -1,0 +1,5 @@
+<tr>
+  <td class="description"><a name="transaction${id}">{{html description}}</a></td>
+  <td class="net {{if net == 0}}nochange{{else net > 0}}positive{{else}}negative{{/if}}"><span class="money">{{if net < 0}}-{{/if}}$${Math.abs(net).toFixed(2)}</span></td>
+  <td class="balance"><span class="money">$${balance.toFixed(2)}</span></td>
+</tr>

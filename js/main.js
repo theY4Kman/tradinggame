@@ -28,20 +28,44 @@ function showBuyTabItems(items)
 {
     var vals = [];
     $.each(items, function (k,v) { vals.push(v); });
-    $('#tab_buying').html($.tmpl('tab_buying', {items: vals}));
-    $('table#items').css('height', $('table#items').height() + 'px');
+    $('#tab_buying').html($.tmpl('auctions_list', {items: vals}));
+    $('#tab_buying table.auctions_list').css('height', $('#tab_buying table.auctions_list').height() + 'px');
     
-    $('#tab_buying table#items td').click(function ()
+    var buy_item = document.createElement('div');
+    buy_item.id = 'buy_item';
+    $('#tab_buying').prepend(buy_item);
+    
+    $('#tab_buying table.auctions_list td').click(function ()
     {
         var id = $(this).parent().find('a').attr('name');
         $('#buy_item').html($.tmpl('buy_item_page', { item: game.auctionsWorld[id] }));
         $('#buy_item').css('height', $('#buy_item').height() + 'px');
         
         // The buy handler
-        $('#buy_item div.confirm').click(function ()
+        $('#buy_item div.confirm').click(function (evt)
         {
           var id = $(this).parent().find('a[name]').attr('name');
-          game.buyItem(id);
+          
+          try
+          {
+              game.buyItem(id);
+          }
+          catch (error)
+          {
+              if (error == 'Not enough money')
+                  $(this).jConf({
+                      sText: 'You don\'t have enough money to buy this item!',
+                      okBtn: 'Okay',
+                      evt: evt
+                  });
+              else
+                  $(this).jConf({
+                      sText: error,
+                      okBtn: 'Okay',
+                      evt: evt
+                  });
+              return;
+          }
         });
         
         // Add the back link handler
@@ -49,12 +73,12 @@ function showBuyTabItems(items)
         {
             $('#buy_item').hide('slide', { direction: 'up' }, function ()
             {
-                $('table#items').show('slide', { direction: 'down' });
+                $('#tab_buying table.auctions_list').show('slide', { direction: 'down' });
             });
         });
         
         // Hide the table and show the buy item page
-        $('table#items').hide('slide', { direction: 'down' }, function ()
+        $('#tab_buying table.auctions_list').hide('slide', { direction: 'down' }, function ()
         {
             $('#buy_item').show('slide', { direction: 'up' });
         });
@@ -73,48 +97,199 @@ function showInventoryTabItems(items)
       if ($('#create_auction a[name]').attr('name') != id)
       {
           $('#create_auction').remove();
-          $.tmpl('create_auction_dialog', {item: game.inventory[id]}).appendTo('body');
+          $.tmpl('create_auction_dialog', {
+            item: game.inventory[id],
+            boughtFor: game.boughtFor[id]
+          }).appendTo('body');
       }
       
-      $('#create_auction').dialog({
-        modal: true,
-        resizable: false,
-        draggable: false,
-        width: '500px',
-        buttons: [
+      var input = $('#create_auction input');
+      function changeNet()
+      {
+          function delayed()
           {
-            text: 'Create',
-            click: function (evt)
-            {
-              var input = $(this).find('input').attr('value');
-              if (!isFloat(input))
+              var amt = input.val();
+              if (!isFloat(amt))
+                  $(this).parent().find('span.netprofit').html('-');
+              else
               {
-                  $(this).parent().find('button').first().jConf({
-                    sText: 'Please enter a valid price.',
-                    okBtn: 'Okay',
-                    evt: evt
-                  });
-                  return;
+                  var entered = parseFloat(input.val());
+                  var delta = entered - game.boughtFor[id];
+                  input.parent().find('span.netprofit').html(((delta < 0) ? '-' : '') + '$' +
+                      Math.abs(delta).toFixed(2));
               }
-              
-              var value = new Number(input);
-              game.createAuction(id, value, null);
-              $(this).dialog('close');
-            }
-          },
-          {
-            text: 'Cancel',
-            click: function () { $(this).dialog('close'); }
           }
-        ]
+          
+          setTimeout(delayed, 10);
+      }
+      
+      $(document).keydown(changeNet);
+      $('#create_auction input').change(changeNet);
+      changeNet();
+      
+      $('#create_auction').dialog({
+          modal: true,
+          resizable: false,
+          draggable: false,
+          width: '500px',
+          buttons: [
+            {
+                text: 'Create',
+                click: function (evt)
+                {
+                    var input = $(this).find('input').val();
+                    if (!isFloat(input))
+                    {
+                        $(this).parent().find('button').first().jConf({
+                            sText: 'Please enter a valid price.',
+                            okBtn: 'Okay',
+                            evt: evt
+                        });
+                        return;
+                    }
+                    
+                    var value = new Number(input);
+                    try
+                    {
+                        game.createAuction(id, value, null);
+                    }
+                    catch (error)
+                    {
+                        $(this).jConf({
+                            sText: error,
+                            okBtn: 'Okay',
+                            evt: evt
+                        });
+                        return;
+                    }
+                    $(this).dialog('close');
+                    
+                    addNotification('Created auction for <span class="item_display">' +
+                        game.inventory[id].name + '</span> for <span class="money">$' +
+                        value.toFixed(2) + '</span>.', 'tab_selling');
+                    
+                    addTransaction({
+                        description: 'Put <span class="item_display">' +
+                            game.inventory[id].name + '</span> up for auction at ' +
+                            '<span class="money">$' + value.toFixed(2) + '</span>.',
+                        net: 0.0,
+                        balance: game.wallet
+                    });
+                }
+              },
+              {
+                  text: 'Cancel',
+                  click: function () {
+                      $(this).dialog('close');
+                      $(document).unbind('keydown', changeNet);
+                  }
+              }
+          ]
       });
     });
 }
 
+function showSellTabItems(items)
+{
+    var vals = [];
+    $.each(items, function (k,v) { vals.push(v); });
+    $('#tab_selling').html($.tmpl('auctions_list', {items: vals}));
+}
+
 function updateWallet(amount)
 {
-  $('#wallet span').html('$' + Math.floor(amount) + '.<span class="decimal">' +
-      (amount % 1).toFixed(2).substring(2) + '');
+  var wallet_amount = $('#wallet #wallet_amount');
+  
+  var floor = Math.floor(amount).toString();
+  var rgx = /(\d+)(\d{3})/;
+  while (rgx.test(floor))
+      floor = floor.replace(rgx, '$1' + ',' + '$2');
+  
+  wallet_amount.html('$' + floor + '.<span class="decimal">' +
+              (amount % 1).toFixed(2).substring(2) + '</span>');
+  
+  var width = 0;
+  $.each($('#wallet').children(), function (k,v) { width += $(v).width(); })
+  
+  if (width > $('#wallet').width())
+      $('#wallet span.label').hide();
+  else
+      $('#wallet span.label').show();
+  
+  width = 0;
+  $.each($('#wallet').children(), function (k,v) { width += $(v).width(); })
+  
+  if (width > $('#wallet').width())
+  {
+      // Add wrap hints (<wbr />) at every comma we add
+      var wbrs = floor.split(',').join(',<wbr />');
+      wallet_amount.html('$' + wbrs + '.<span class="decimal">' +
+                  (amount % 1).toFixed(2).substring(2) + '</span>');
+  }
+  
+  $('#wallet').effect('highlight', {color: '#66DE00'}, 750);
+}
+
+function removeClearNotifications()
+{
+    if ($('#tab_select li.notification').not('.removing').not('#clear_notifications').length == 0)
+        $('#clear_notifications').slideUp(function () { $(this).remove(); });
+}
+
+/* `html` is the markup to put in the notification, and `tab` is the href minus
+ * the pound sign of the tab to display if the player clicks on the notification
+ */
+function addNotification(html, tab)
+{
+    var elem = $(document.createElement('li'));
+    
+    elem.addClass('notification ui-corner-all');
+    if ($('#tab_select li.notification').length == 0)
+    {
+        var clear = $(document.createElement('li'));
+        clear.attr('id', 'clear_notifications');
+        clear.addClass('notification first hand ui-corner-all');
+        clear.css('font-weight', 'bold');
+        clear.html('Clear Notifications');
+        clear.click(function ()
+        {
+            $('li.notification').slideUp(function () { $(this).remove(); });
+        });
+        clear.appendTo('#tab_select');
+        
+        elem.addClass('first');
+    }
+    
+    if (tab != undefined)
+        elem.click(function ()
+        {
+            $('#tabs').tabs('select', tab);
+        });
+    
+    elem.click(function ()
+    {
+        elem.addClass('removing');
+        elem.slideUp(function () { elem.remove(); });
+        removeClearNotifications();
+    });
+    
+    elem.html(html);
+    elem.appendTo('#tab_select');
+    elem.effect('highlight', {}, 1000);
+    setTimeout(function ()
+    {
+        elem.addClass('removing');
+        elem.slideUp(function () { $(this).remove(); });
+        removeClearNotifications();
+    }, 30000);
+}
+
+var last_transaction_id = 0;
+/* `tr` should be a dictionary with three keys: description, net, and balance */
+function addTransaction(tr)
+{
+    tr['id'] = ++last_transaction_id;
+    $.tmpl('transaction', tr).appendTo('#transactions .list');
 }
 
 function jQueryInit()
@@ -122,12 +297,15 @@ function jQueryInit()
     game = require('game');
     game.populate();
     
+    /*if (window.localStorage.game != undefined)
+        game.load();*/
+    
     require(["js/jquery-ui-1.8.14.min.js", "js/jquery.tmpl.min.js", "js/jConf-1.2.0.js"], function ()
     {
         $(function()
         {
             var tabs = $('#tabs').tabs().addClass('ui-tabs-vertical ui-helper-clearfix');
-            $('#tabs li').removeClass('ui-corner-top');
+            $('#tabs li.ui-state-default').removeClass('ui-corner-top');
             $('#tabs li').click(function() {
                 $('#tabs').tabs('select', ''+$(this).children().attr('href'));
             });
@@ -139,9 +317,43 @@ function jQueryInit()
               updateWallet(evt.to);
             });
             
-            $.get('js/templates/tab_buying.htm', {}, function (data)
+            $.get('js/templates/transaction.htm', {}, function (data)
             {
-                $.template('tab_buying', data);
+                $.template('transaction', data);
+                
+                // Initial transaction
+                addTransaction({
+                    description: 'Began game.',
+                    net: 0.0,
+                    balance: game.wallet
+                });
+                
+                // Setup the transactions log hooks
+                game.bind('ItemBought', function (auction)
+                {
+                    addTransaction({
+                        description: 'Bought <span class="item_display">' +
+                            auction.item.name + '</span>.',
+                        net: -auction.price,
+                        balance: game.wallet
+                    });
+                });
+                game.bind('AuctionSold', function (auction)
+                {
+                    addTransaction({
+                        description: 'Sold <span class="item_display">' +
+                            auction.item.name + '</span>.',
+                        net: auction.price,
+                        balance: game.wallet
+                    });
+                });
+            });
+            
+            $.get('js/templates/auctions_list.htm', {}, function (data)
+            {
+                $.template('auctions_list', data);
+                showSellTabItems(game.auctionsMine);
+                
                 $.get('js/templates/buy_item_page.htm', {}, function (data)
                 {
                     $.template('buy_item_page', data);
@@ -150,6 +362,24 @@ function jQueryInit()
                     game.bind('AuctionAdded', function (item)
                     {
                         showBuyTabItems(game.auctionsWorld);
+                        showSellTabItems(game.auctionsMine);
+                    });
+                    game.bind('ItemBought', function (auction)
+                    {
+                        showBuyTabItems(game.auctionsWorld);
+                        $('#tab_buying a.back').click();
+                        
+                        addNotification('Bought <span class="item_display">' +
+                            auction.item.name + '</span> for <span class="money">$' +
+                            auction.price.toFixed(2) + '</span>.', 'tab_inventory');
+                    });
+                    game.bind('AuctionSold', function (auction)
+                    {
+                        showSellTabItems(game.auctionsMine);
+                        
+                        addNotification('Sold <span class="item_display">' +
+                            auction.item.name + '</span> for <span class="money">$' +
+                            auction.price.toFixed(2) + '</span>.');
                     });
                 });
             });
@@ -166,8 +396,17 @@ function jQueryInit()
                     {
                       showInventoryTabItems(game.inventory);
                     });
+                    game.bind('InventoryItemRemoved', function (item)
+                    {
+                      showInventoryTabItems(game.inventory);
+                    });
                 });
             });
         });
+    });
+    
+    $(window).unload(function ()
+    {
+        game.save();
     });
 }

@@ -1,7 +1,7 @@
         <div id="create_auction" title="Create New Auction">
           <a name="${item.id}"><img class="img" src="${item.img}" /></a>
           <div class="form">
-            <p>Market Value: <span class="value">${item.value.toFixed(2)}</span></p>
-            <p>Your Price: <input type="text" value="${item.value.toFixed(2)}" /></p>
+            <p>Market Value: <span class="value">$${item.value.toFixed(2)}</span><br />Bought For: <span class="value">$${boughtFor.toFixed(2)}</span></p>
+            <p>Your Price: <input type="text" value="${item.value.toFixed(2)}" /><br />Net Profit: <span class="netprofit value">$0.00</span></p>
           </div>
         </div>
