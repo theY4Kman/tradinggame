@@ -274,7 +274,7 @@ function addNotification(html, tab)
     });
     
     elem.html(html);
-    elem.appendTo('#tab_select');
+    elem.insertBefore('#tab_select li.notification:first')
     elem.effect('highlight', {}, 1000);
     setTimeout(function ()
     {

@@ -3,6 +3,34 @@ define(['js/microevent.js'], function () {
     var config = {
         rate_newitems: 0.01, // 100 seconds per item?
         rate_buy: 0.02, // FIXME this is a dumb parameter, replace with market model
+        PROFIT_RATE: 0.2,
+    };
+
+    // Function to create an achievement
+    function achievement_cash(amount) {
+        var m = {
+            name: 'Cash' + amount,
+            description: 'Get $' + amount + ' in your wallet',
+            unlocked: false,
+            install: function (game) {
+                game.achievements[m.name] = this;
+                function check(evt) {
+                    if (game.wallet >= amount) {
+                        m.unlocked = true;
+                        game.trigger('AchievementUnlocked', m);
+                        game.unbind('WalletChanged', check)
+                    }                    
+                }
+                game.bind('WalletChanged', check);
+            },
+        };
+        return m;
+    }
+    
+    var achievements = {
+        'Cash1200': achievement_cash(1200),
+        'Cash2000': achievement_cash(2000),
+        'Cash5000': achievement_cash(5000),
     };
 
     var items = [
@@ -18,25 +46,6 @@ define(['js/microevent.js'], function () {
         'Andrew': {id:'Andrew', ratings:{pos: 10, neg:5}, priv:{defect_rate:0.8}},
         'Zach': {id:'Zach', ratings:{pos: 10, neg:5}, priv:{defect_rate:0.0}},
     }
-
-    function newAuctionWorld() {
-        // Create a clone of an item with a unique key
-        var item = Object.create(choice(items));
-        item.id = randomString(20);
-        var seller = choice(sellers);
-        // fixme: add either A) a normal distribution here, 
-        // or B) a sampling based on a buy/sell volume curve
-        var price = item.value * (1+(Math.random()*2-1)*0.1);
-        price = Math.round(price*100)/100;
-        var auction = {
-            id: randomString(20),
-            item: item,
-            price: price,
-            seller: seller,
-            timestamp: new Date().getTime(),
-        }
-        return auction;
-    };
 
     function randomString(len, charSet) {
         charSet = charSet || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -84,11 +93,16 @@ define(['js/microevent.js'], function () {
         this._ticker = setInterval(function () { self.trigger('tick'); }, 500);
         this.bind('tick', this._tick);
 
+        // Install all the achievements
+        this.achievements = {};
+        for (var k in achievements) {
+            achievements[k].install(this);
+        }
+        
         // Create some default logs
-        logtriggers = ['InventoryItemAdded', 
-                       'AuctionAdded', 
-                       'ItemBought',
-                       'AuctionSold'];
+        logtriggers = ['ItemBought',
+                       'AuctionSold',
+                       'AchievementUnlocked'];
         for (var i in logtriggers) {
             (function (game) {
                 var s = logtriggers[i];
@@ -96,6 +110,30 @@ define(['js/microevent.js'], function () {
             })(this);
         }
     }
+
+    Game.prototype.newAuctionWorld = function (networth) {
+        networth = networth || this.wallet;
+        // Create a clone of an item with a unique key
+        var item = Object.create(choice(items));
+        item.id = randomString(20);
+        var seller = choice(sellers);
+
+        // fixme: add either A) a normal distribution here, 
+        // or B) a sampling based on a buy/sell volume curve
+        var factor = 0.3 + (Math.random()*2-1)*0.2;
+        //var price = item.value * (1+(Math.random()*2-1)*0.1);
+        var price = networth * factor;
+        price = Math.round(price*100)/100;
+
+        var auction = {
+            id: randomString(20),
+            item: item,
+            price: price,
+            seller: seller,
+            timestamp: new Date().getTime(),
+        }
+        return auction;
+    };
 
     Game.prototype.save = function () {
         window.localStorage.game = JSON.stringify(this);
@@ -138,9 +176,25 @@ define(['js/microevent.js'], function () {
 
     // Call this to populate the buyable items with some initial things
     Game.prototype.populate = function () {
-        var n_auctions = 10;
+        // Clear all the existing world auctions
+        for (var id in this.auctionsWorld) {
+            var auction = this.auctionsWorld[id];
+            delete(this.auctionsWorld[id]);
+            this.trigger('AuctionRemoved', auction);
+        }
+
+        // Find our total networth by adding all inventory items
+        // FIXME make networth a game property, like wallet. Or at least a property
+        // of the inventory
+        var networth = this.wallet;
+        for (var k in this.inventory) {
+            networth += this.boughtFor[this.inventory[k].id];
+        }
+
+        // Add 10 more auctions
+        var n_auctions = 10;        
         for (var i = 0; i < n_auctions; i++) {
-            var auction = newAuctionWorld();
+            var auction = this.newAuctionWorld(networth);
             this.auctionsWorld[auction.id] = auction;
             this.trigger('AuctionAdded', auction);
         }
@@ -164,6 +218,9 @@ define(['js/microevent.js'], function () {
         this.trigger('WalletChanged', {'from':oldwallet, 'to':this.wallet});
         this.trigger('ItemBought', auction);
         this.trigger('InventoryItemAdded', item);
+
+        this.createAuction(item.id, auction.price * (1.0 + config.PROFIT_RATE));
+        this.populate();
     }
 
     // Put an item up for sale
@@ -186,6 +243,15 @@ define(['js/microevent.js'], function () {
         this.auctionsMine[auction.id] = auction;
         item.auctionid = auction.id;
         this.trigger('AuctionAdded', auction);
+    }
+
+    Game.prototype.autoplay = function() {
+        var game = this;
+        function autoplay() {
+            var auction = choice(game.auctionsWorld);
+            game.buyItem(auction.id);
+        }
+        game._autoplay = setInterval(autoplay, 2000);
     }
 
     Game.prototype.testA = function() {
