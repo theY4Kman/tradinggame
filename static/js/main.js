@@ -24,6 +24,12 @@ function isFloat(str)
   return !isNaN(new Number(str));
 }
 
+// Formats currency currently to truncate at two decimal places
+function currency(amount)
+{
+    return amount.toFixed(3).slice(0,-1);
+}
+
 function showBuyTabItems(items)
 {
     var vals = [];
@@ -116,7 +122,7 @@ function showInventoryTabItems(items)
                   var entered = parseFloat(input.val());
                   var delta = entered - game.boughtFor[id];
                   input.parent().find('span.netprofit').html(((delta < 0) ? '-' : '') + '$' +
-                      Math.abs(delta).toFixed(2));
+                      currency(Math.abs(delta)));
               }
           }
           
@@ -166,12 +172,12 @@ function showInventoryTabItems(items)
                     
                     addNotification('Created auction for <span class="item_display">' +
                         game.inventory[id].name + '</span> for <span class="money">$' +
-                        value.toFixed(2) + '</span>.', 'tab_selling');
+                        currency(value) + '</span>.', 'tab_selling');
                     
                     addTransaction({
                         description: 'Put <span class="item_display">' +
                             game.inventory[id].name + '</span> up for auction at ' +
-                            '<span class="money">$' + value.toFixed(2) + '</span>.',
+                            '<span class="money">$' + currency(value) + '</span>.',
                         net: 0.0,
                         balance: game.wallet
                     });
@@ -206,7 +212,7 @@ function updateWallet(amount)
       floor = floor.replace(rgx, '$1' + ',' + '$2');
   
   wallet_amount.html('$' + floor + '.<span class="decimal">' +
-              (amount % 1).toFixed(2).substring(2) + '</span>');
+              currency(amount % 1).substring(2) + '</span>');
   
   var width = 0;
   $.each($('#wallet').children(), function (k,v) { width += $(v).width(); })
@@ -224,7 +230,7 @@ function updateWallet(amount)
       // Add wrap hints (<wbr />) at every comma we add
       var wbrs = floor.split(',').join(',<wbr />');
       wallet_amount.html('$' + wbrs + '.<span class="decimal">' +
-                  (amount % 1).toFixed(2).substring(2) + '</span>');
+                  currency(amount % 1).substring(2) + '</span>');
   }
   
   $('#wallet').effect('highlight', {color: '#66DE00'}, 750);
@@ -281,9 +287,9 @@ function addNotification(html, tab, achievement)
     
     if (achievement)
     {
-        var innerspan = $(document.createElement('span'));
-        innerspan.html(html);
-        innerspan.appendTo(elem);
+        var innerdiv = $(document.createElement('div'));
+        innerdiv.html(html);
+        innerdiv.appendTo(elem);
     }
     else
         elem.html(html);
@@ -429,7 +435,7 @@ function jQueryInit()
                         
                         addNotification('Bought <span class="item_display">' +
                             auction.item.name + '</span> for <span class="money">$' +
-                            auction.price.toFixed(2) + '</span>.', 'tab_inventory');
+                            currency(auction.price) + '</span>.', 'tab_inventory');
                     });
                     game.bind('AuctionSold', function (auction)
                     {
@@ -437,7 +443,7 @@ function jQueryInit()
                         
                         addNotification('Sold <span class="item_display">' +
                             auction.item.name + '</span> for <span class="money">$' +
-                            auction.price.toFixed(2) + '</span>.');
+                            currency(auction.price) + '</span>.');
                     });
                 });
             });
@@ -459,6 +465,16 @@ function jQueryInit()
                       showInventoryTabItems(game.inventory);
                     });
                 });
+            });
+            
+            game.bind('AchievementUnlocked', function(m)
+            {
+                if (m.name.substring(0,4) == 'Cash')
+                {
+                    var amount = m.name.substring(4);
+                    addAchievement('Reached <span class="money">$' + currency(new Number(amount)) +
+                        '</span> in your wallet!');
+                }
             });
         });
     });

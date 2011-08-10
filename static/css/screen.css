@@ -114,11 +114,12 @@ body {
 }
 .ui-tabs .ui-tabs-nav li.notification:hover { background-color: #1874CD; }
 .ui-tabs .ui-tabs-nav li.notification.achievement {
-  background: #EEAD0E url(../img/trophy.png) no-repeat 5px 5px;
+  background: #EEAD0E url(../img/trophy.png) no-repeat 5px 1em;
   min-height: 15px;
 }
-.ui-tabs .ui-tabs-nav li.notification.achievement span { margin-left: 24px; }
+.ui-tabs .ui-tabs-nav li.notification.achievement div { margin-left: 24px; }
 .ui-tabs .ui-tabs-nav li.notification.achievement:hover { background-color: #FFB90F; }
+.ui-tabs .ui-tabs-nav li.notification.achievement div span.money { color: #0B0; }
 
 
 /* Auction List */
