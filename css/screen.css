@@ -113,6 +113,12 @@ body {
   width: 110px;
 }
 .ui-tabs .ui-tabs-nav li.notification:hover { background-color: #1874CD; }
+.ui-tabs .ui-tabs-nav li.notification.achievement {
+  background: #EEAD0E url(../img/trophy.png) no-repeat 5px 5px;
+  min-height: 15px;
+}
+.ui-tabs .ui-tabs-nav li.notification.achievement span { margin-left: 24px; }
+.ui-tabs .ui-tabs-nav li.notification.achievement:hover { background-color: #FFB90F; }
 
 
 /* Auction List */

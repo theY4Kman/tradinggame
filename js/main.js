@@ -239,11 +239,17 @@ function removeClearNotifications()
 /* `html` is the markup to put in the notification, and `tab` is the href minus
  * the pound sign of the tab to display if the player clicks on the notification
  */
-function addNotification(html, tab)
+function addNotification(html, tab, achievement)
 {
+    if (achievement == undefined)
+        achievement = false;
+    
     var elem = $(document.createElement('li'));
     
     elem.addClass('notification ui-corner-all');
+    if (achievement)
+        elem.addClass('achievement');
+    
     if ($('#tab_select li.notification').length == 0)
     {
         var clear = $(document.createElement('li'));
@@ -273,15 +279,28 @@ function addNotification(html, tab)
         removeClearNotifications();
     });
     
-    elem.html(html);
+    if (achievement)
+    {
+        var innerspan = $(document.createElement('span'));
+        innerspan.html(html);
+        innerspan.appendTo(elem);
+    }
+    else
+        elem.html(html);
+    
     elem.appendTo('#tab_select');
-    elem.effect('highlight', {}, 1000);
+    elem.effect('highlightnobgchange', {}, 1000);
     setTimeout(function ()
     {
         elem.addClass('removing');
         elem.slideUp(function () { $(this).remove(); });
         removeClearNotifications();
     }, 30000);
+}
+
+function addAchievement(html)
+{
+    addNotification(html, undefined, true);
 }
 
 var last_transaction_id = 0;
@@ -304,6 +323,45 @@ function jQueryInit()
     {
         $(function()
         {
+            (function($) {
+ 
+                $.effects.highlightnobgchange = function(o) {
+                 
+                    return this.queue(function() {
+                 
+                        // Create element
+                        var el = $(this), props = ['backgroundColor','opacity'];
+                 
+                        // Set options
+                        var mode = $.effects.setMode(el, o.options.mode || 'show'); // Set Mode
+                        var color = o.options.color || "#ffff99"; // Default highlight color
+                        var oldColor = el.css("backgroundColor");
+                 
+                        // Adjust
+                        $.effects.save(el, props); el.show(); // Save & Show
+                        el.css({backgroundColor: color}); // Shift
+                 
+                        // Animation
+                        var animation = {backgroundColor: oldColor };
+                        if (mode == "hide") animation['opacity'] = 0;
+                 
+                        // Animate
+                        el.animate(animation, { queue: false, duration: o.duration, easing: o.options.easing,
+                        complete: function() {
+                            if (mode == "hide") el.hide();
+                            $.effects.restore(el, props);
+                        if (mode == "show" && $.browser.msie) this.style.removeAttribute('filter');
+                            if(o.callback) o.callback.apply(this, arguments);
+                            el.dequeue();
+                        }});
+                 
+                    });
+                 
+                };
+                 
+            })(jQuery);
+            
+            
             var tabs = $('#tabs').tabs().addClass('ui-tabs-vertical ui-helper-clearfix');
             $('#tabs li.ui-state-default').removeClass('ui-corner-top');
             $('#tabs li').click(function() {
