@@ -25,9 +25,21 @@ function isFloat(str)
 }
 
 // Formats currency currently to truncate at two decimal places
-function currency(amount)
+function currency(amount, decimal)
 {
-    return amount.toFixed(3).slice(0,-1);
+    if (decimal == undefined)
+        decimal = true;
+    
+    if (!decimal)
+        var str = Math.floor(amount).toString();
+    else
+        var str = amount.toFixed(3).slice(0,-1)
+    
+    var rgx = /(\d+)(\d{3})/;
+    while (rgx.test(str))
+        str = str.replace(rgx, '$1' + ',<wbr />' + '$2');
+    
+    return str;
 }
 
 function showBuyTabItems(items)
@@ -206,12 +218,7 @@ function updateWallet(amount)
 {
   var wallet_amount = $('#wallet #wallet_amount');
   
-  var floor = Math.floor(amount).toString();
-  var rgx = /(\d+)(\d{3})/;
-  while (rgx.test(floor))
-      floor = floor.replace(rgx, '$1' + ',' + '$2');
-  
-  wallet_amount.html('$' + floor + '.<span class="decimal">' +
+  wallet_amount.html('$' + currency(amount, false) + '.<span class="decimal">' +
               currency(amount % 1).substring(2) + '</span>');
   
   var width = 0;
@@ -221,17 +228,6 @@ function updateWallet(amount)
       $('#wallet span.label').hide();
   else
       $('#wallet span.label').show();
-  
-  width = 0;
-  $.each($('#wallet').children(), function (k,v) { width += $(v).width(); })
-  
-  if (width > $('#wallet').width())
-  {
-      // Add wrap hints (<wbr />) at every comma we add
-      var wbrs = floor.split(',').join(',<wbr />');
-      wallet_amount.html('$' + wbrs + '.<span class="decimal">' +
-                  currency(amount % 1).substring(2) + '</span>');
-  }
   
   $('#wallet').effect('highlight', {color: '#66DE00'}, 750);
 }

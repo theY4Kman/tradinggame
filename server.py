@@ -1,9 +1,26 @@
-import argparse
-import flask
-from gevent.wsgi import WSGIServer
+# <Trading Game>
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import json
 import os
 import urlparse
+from binascii import crc32
+
+import argparse
+import flask
+from gevent.wsgi import WSGIServer
 import redis
 from werkzeug import SharedDataMiddleware
 
@@ -12,6 +29,7 @@ db = None
 
 def startapp(args):
     global app, db
+    global get_next_url, add_next_url
     
     app = flask.Flask(__name__, static_url_path='/')
     #app.debug=True
@@ -22,10 +40,21 @@ def startapp(args):
 
 
     # Generate the secret key if it hasn't been already
-    if db.get('secretkey') is None:
+    if not db.exists('secretkey'):
         db.set('secretkey', os.urandom(36))
     app.secret_key = db.get('secretkey')
     
+    
+    def get_next_url():
+        if not db.exists('next_url_id'):
+            db.set('next_url_id', 0)
+        url_id = db.get('next_url_id')
+        db.incr('next_url_id')
+        
+        return ('%08x' % crc32(app.secret_key + url_id)).replace('-', '')
+    
+    def add_next_url():
+        db.sadd('url_ids', get_next_url())
     
     @app.route('/')
     def index(**kwargs):

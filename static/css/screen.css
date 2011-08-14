@@ -114,7 +114,7 @@ body {
 }
 .ui-tabs .ui-tabs-nav li.notification:hover { background-color: #1874CD; }
 .ui-tabs .ui-tabs-nav li.notification.achievement {
-  background: #EEAD0E url(../img/trophy.png) no-repeat 5px 1em;
+  background: #EEAD0E url(../img/trophy.png) no-repeat 5px center;
   min-height: 15px;
 }
 .ui-tabs .ui-tabs-nav li.notification.achievement div { margin-left: 24px; }
