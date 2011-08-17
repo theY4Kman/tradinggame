@@ -15,6 +15,7 @@
 
 import json
 import os
+import os.path
 import urlparse
 from binascii import crc32
 
@@ -26,15 +27,16 @@ from werkzeug import SharedDataMiddleware
 
 app = None
 db = None
+base = os.path.dirname(__file__)
 
 def startapp(args):
     global app, db
     global get_next_url, add_next_url
     
     app = flask.Flask(__name__, static_url_path='/')
-    #app.debug=True
+    app.debug=True
     app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
-        '/': os.path.join(os.path.dirname(__file__), 'static')})
+        '/': os.path.join(base, 'static')})
 
     db = redis.Redis(port=args.redis_port)
 
@@ -53,21 +55,37 @@ def startapp(args):
         
         return ('%08x' % crc32(app.secret_key + url_id)).replace('-', '')
     
-    def add_next_url():
+    def add_next_url(user):
         db.sadd('url_ids', get_next_url())
     
     @app.route('/')
     def index(**kwargs):
         return flask.redirect('/index.htm')
     
-    @app.route('/test', methods=['GET'])
-    def test():
-        return 'blah'
-    
-    @app.route('/post', methods=['POST'])
+    @app.route('/post/', methods=['POST'])
     def post():
-        # Get the JSON of a gameplay transaction and store it in the database
+        if not (request.form.has_key('event') or
+            not request.form.has_key('data') or
+            not request.form.has_key('id')):
+            return 500
+        
+        id = request.form['id']
+        name = request.form['event']
+        data = request.form['data']
+        
+        db.lpush('%s:log' % id, json.dumps({ 'name': name, 'data': data }))
         return 'OK'
+    
+    
+    @app.route('/play/<id>/')
+    def play(id):
+        print db.sismember
+        if not db.sismember('url_ids', id) and not db.exists('%s:log' % id):
+            return '', 404
+        
+        db.lpush('%s:log' % id, 'Began game.')
+        with open(os.path.join(base, 'static', 'index.htm'), 'r') as fp:
+            return fp.read()
 
 
 if __name__ == '__main__':

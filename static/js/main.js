@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require(["js/jquery-1.6.2.min.js", "game"], jQueryInit);
+require(["/js/jquery-1.6.2.min.js", "game"], jQueryInit);
 
 var game = null;
 
@@ -317,11 +317,12 @@ function jQueryInit()
 {
     game = require('game');
     game.populate();
+    window.game = game;
     
     /*if (window.localStorage.game != undefined)
         game.load();*/
     
-    require(["js/jquery-ui-1.8.14.min.js", "js/jquery.tmpl.min.js", "js/jConf-1.2.0.js"], function ()
+    require(["/js/jquery-ui-1.8.14.min.js", "/js/jquery.tmpl.min.js", "/js/jConf-1.2.0.js", '/js/net.js'], function ()
     {
         $(function()
         {
@@ -377,7 +378,7 @@ function jQueryInit()
               updateWallet(evt.to);
             });
             
-            $.get('js/templates/transaction.htm', {}, function (data)
+            $.get('/js/templates/transaction.htm', {}, function (data)
             {
                 $.template('transaction', data);
                 
@@ -409,12 +410,12 @@ function jQueryInit()
                 });
             });
             
-            $.get('js/templates/auctions_list.htm', {}, function (data)
+            $.get('/js/templates/auctions_list.htm', {}, function (data)
             {
                 $.template('auctions_list', data);
                 showSellTabItems(game.auctionsMine);
                 
-                $.get('js/templates/buy_item_page.htm', {}, function (data)
+                $.get('/js/templates/buy_item_page.htm', {}, function (data)
                 {
                     $.template('buy_item_page', data);
                     showBuyTabItems(game.auctionsWorld);
@@ -444,10 +445,10 @@ function jQueryInit()
                 });
             });
             
-            $.get('js/templates/tab_inventory.htm', {}, function (data)
+            $.get('/js/templates/tab_inventory.htm', {}, function (data)
             {
                 $.template('tab_inventory', data);
-                $.get('js/templates/create_auction_dialog.htm', {}, function (data)
+                $.get('/js/templates/create_auction_dialog.htm', {}, function (data)
                 {
                     $.template('create_auction_dialog', data);
                     showInventoryTabItems(game.inventory);
