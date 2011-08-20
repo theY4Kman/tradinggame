@@ -18,6 +18,7 @@ import os
 import os.path
 import urlparse
 from binascii import crc32
+from time import time
 
 import argparse
 import flask
@@ -77,12 +78,41 @@ def startapp(args):
     
     @app.route('/play/<id>/')
     def play(id):
-        print db.sismember
-        if not db.sismember('url_ids', id) and not db.exists('%s:log' % id):
+        log = '%s:log' % id
+        if not db.sismember('url_ids', id) and not db.exists(log):
             return '', 404
+        
+        if not db.exists(log):
+            db.srem('url_ids', id)
+            db.sadd('used_url_ids', id)
+            
+            # Add activated URL event to initialize list
+            db.lpush(log, '{"name":"Activated URL","data":{"id":"%s"},"time":%s}'
+                % (id, int(time())))
         
         with open(os.path.join(base, 'static', 'index.htm'), 'r') as fp:
             return fp.read()
+    
+    @app.route('/admin/')
+    def admin():
+        if not app.debug:
+            return '', 404
+        
+        html = ''
+        
+        ids = db.smembers('used_url_ids')
+        for id in ids:
+            events = db.lrange('%s:log' % id, 0, -1)
+            html += '''\
+<div style="margin-bottom: 3em;">
+  <h2>%s</h2>
+  <ul>
+    <li>%s</li>
+  </ul>
+</div>
+''' % (id, '    </li>\n    <li>'.join(events) or 'No events')
+        
+        return html
 
 
 if __name__ == '__main__':
