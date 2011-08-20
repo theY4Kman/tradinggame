@@ -125,7 +125,7 @@ body {
 /* Auction List */
 table.auctions_list {
   border-spacing: 0px;
-  width: 40em;
+  width: 775px;
 }
 .auctions_list th {
   border-bottom: 1px solid gray;
@@ -157,7 +157,7 @@ table.auctions_list {
 /* Transactions log */
 table#transactions {
   border-spacing: 0px;
-  width: 40em;
+  width: 775px;
 }
 #transactions th {
   border-bottom: 1px solid gray;

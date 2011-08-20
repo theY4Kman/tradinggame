@@ -1,0 +1,15 @@
+body { font-family: 'Trebuchet MS', Tahoma, Verdana, Arial, sans-serif; }
+
+#instructions {
+  margin-left: 30px;
+  text-align: left;
+}
+#instructions h1, #instructions h2 { text-align: center; }
+#instructions h1 {
+  color: #1874CD;
+  margin-bottom: 0;
+}
+#instructions h2 {
+  color: #104E8B;
+  margin-top: 0;
+}
