@@ -4,16 +4,26 @@
     <title>Trading Game</title>
     <link rel="stylesheet" href="/css/instructions-screen.css" type="text/css" media="screen" />
     <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+    <script type="text/javascript" language="javascript">
+        function beginPlay()
+        {
+            document.getElementById("iframe").src = '/game.htm';
+            document.getElementById("accept").style.display = 'none';
+        }
+    </script>
   </head>
   <body>
     <div align="center" style="width: 1005px; margin: 0 auto;">
-      <iframe src="/game.htm" width="1000" height="640" scrolling="auto" frameborder="1">
+      <iframe src="/read.htm" width="1000" height="640" scrolling="auto" frameborder="1" id="iframe">
         <p>Your browser must support iframes to play.</p>
       </iframe>
       <div id="instructions">
         <h1>Trading Game</h1>
         <h2>Instructions</h2>
         <p>Poop tard muffin taco pie apples</p>
+      </div>
+      <div id="accept">
+        <button onmouseup="beginPlay();">I read the instructions. Let's play!</button>
       </div>
     </div>
   </body>
