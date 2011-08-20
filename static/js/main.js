@@ -331,6 +331,7 @@ function setTimer(seconds)
 function endGame()
 {
     addNotification('Game over! Thanks for playing.');
+    window.localStorage['wallet'] = game.wallet;
     
     $('#timer').css('background-color', '#CD2626');
     $('#timer').effect('highlightnobgchange', {}, 1000);

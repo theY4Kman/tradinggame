@@ -47,6 +47,10 @@ def startapp(args):
         db.set('secretkey', os.urandom(36))
     app.secret_key = db.get('secretkey')
     
+    # Setup the user ID counter
+    if not db.exists('id_counter'):
+        db.set('id_counter', 1)
+    
     
     def get_next_url():
         if not db.exists('next_url_id'):
@@ -58,6 +62,19 @@ def startapp(args):
     
     def add_next_url(user):
         db.sadd('url_ids', get_next_url())
+    
+    def gen_url_csv():
+        if not db.exists('url_ids'):
+            return None
+        
+        return ','.join('/play/%s/' % s for s in db.smembers('url_ids'))
+    
+    @app.route('/csv/')
+    def csv(filename='urls.csv'):
+        if app.debug is False:
+            return '',404
+        
+        return gen_url_csv()
     
     @app.route('/')
     def index(**kwargs):
@@ -87,6 +104,9 @@ def startapp(args):
         if not db.exists(log):
             db.srem('url_ids', id)
             db.sadd('used_url_ids', id)
+            
+            db.set('%s:id', db.get('id_counter'))
+            db.incr('id_counter')
             
             # Add activated URL event to initialize list
             db.lpush(log, '{"name":"Activated URL","data":{"id":"%s"},"time":%s}'
