@@ -67,6 +67,11 @@ def startapp(args):
             id = get_next_url()
         db.sadd('url_ids', id)
     
+    # Adds a certain amount of URLs
+    def add_urls(n=100):
+        for x in xrange(n):
+            add_next_url()
+    
     # Clear the URL IDs from the URL ID lists. If `used_only` is True, only the
     # activated URL IDs are removed.
     def clear_urls(used_only=True):
