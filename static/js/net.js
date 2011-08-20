@@ -30,7 +30,7 @@ define(["/js/jquery-ui-1.8.14.min.js"], function()
         this.timer = setTimeout(this.sendQueue, this.max_seconds * 1000);
     }
     
-    EventPoster.prototype.sendQueue = function()
+    EventPoster.prototype.sendQueue = function(redirect)
     {
         if (this.urlid == null)
             return false;
@@ -45,11 +45,26 @@ define(["/js/jquery-ui-1.8.14.min.js"], function()
         
         var events = this;
         
-        jQuery.post('/post/', { 'events': JSON.stringify(this._queue) }, function()
+        var data = {
+            'events': JSON.stringify(this._queue),
+            'id': this.urlid
+        };
+        
+        jQuery.post('/post/', data, function()
             {
                 clearTimeout(events.timer);
-                events.timer = setTimeout(events.sendQueue,
-                    events.max_seconds * 1000);
+                
+                if (redirect)
+                    setTimeout(function()
+                        {
+                            if (window.location.href != window.parent.location.href)
+                                window.parent.location.href = redirect;
+                            else
+                                window.location.href = redirect;
+                        }, 5*1000);
+                else
+                    events.timer = setTimeout(events.sendQueue,
+                        events.max_seconds * 1000);
             })
         .error(function()
             {

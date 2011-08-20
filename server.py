@@ -66,9 +66,11 @@ def startapp(args):
     
     @app.route('/post/', methods=['POST'])
     def post():
-        if not flask.request.form.has_key('events'):
+        if not flask.request.form.has_key('events') or \
+            not flask.request.form.has_key('id'):
             return 'BAD',500
         
+        id = flask.request.form['id']
         events = json.loads(flask.request.form['events'])
         for event in events:
             db.lpush('%s:log' % id, json.dumps(event))
@@ -98,8 +100,7 @@ def startapp(args):
         if not app.debug:
             return '', 404
         
-        html = ''
-        
+        html = '<link rel="stylesheet" href="/css/other-screen.css" />'
         ids = db.smembers('used_url_ids')
         for id in ids:
             events = db.lrange('%s:log' % id, 0, -1)

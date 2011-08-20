@@ -13,3 +13,4 @@ body { font-family: 'Trebuchet MS', Tahoma, Verdana, Arial, sans-serif; }
   color: #104E8B;
   margin-top: 0;
 }
+#instructions p { text-indent: 2em; }

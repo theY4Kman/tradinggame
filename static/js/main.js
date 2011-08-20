@@ -20,6 +20,10 @@ require(["/js/jquery-1.6.2.min.js", "game", "net"], jQueryInit);
 var game = null;
 var events = null;
 
+// Time limit (in seconds)
+var timeLimit = 60 * 5;
+var _timeLeft = timeLimit;
+
 function isFloat(str)
 {
   return !isNaN(new Number(str));
@@ -314,6 +318,28 @@ function addTransaction(tr)
     $.tmpl('transaction', tr).appendTo('#transactions .list');
 }
 
+function setTimer(seconds)
+{
+    var str_sec = '' + (seconds % 60);
+    if (str_sec.length == 1)
+        str_sec = '0' + str_sec;
+    
+    $('#timer div').html(parseInt(seconds / 60) + ':' + str_sec);
+}
+
+/* Finishes the game and sends the user to the end page */
+function endGame()
+{
+    addNotification('Game over! Thanks for playing.');
+    
+    $('#timer').css('background-color', '#CD2626');
+    $('#timer').effect('highlightnobgchange', {}, 1000);
+    
+    events.addEvent('EndGame', {'wallet': game.wallet});
+    // Send anything left in the queue
+    events.sendQueue('/end.htm');
+}
+
 function jQueryInit()
 {
     game = require('game');
@@ -382,100 +408,123 @@ function jQueryInit()
             });
             
             $.get('/js/templates/transaction.htm', {}, function (data)
-            {
-                $.template('transaction', data);
-                
-                // Initial transaction
-                addTransaction({
-                    description: 'Began game.',
-                    net: 0.0,
-                    balance: game.wallet
-                });
-                
-                // Setup the transactions log hooks
-                game.bind('ItemBought', function (auction)
                 {
+                    $.template('transaction', data);
+                    
+                    // Initial transaction
                     addTransaction({
-                        description: 'Bought <span class="item_display">' +
-                            auction.item.name + '</span>.',
-                        net: -auction.price,
+                        description: 'Began game.',
+                        net: 0.0,
                         balance: game.wallet
                     });
+                    
+                    // Setup the transactions log hooks
+                    game.bind('ItemBought', function (auction)
+                        {
+                            addTransaction({
+                                description: 'Bought <span class="item_display">' +
+                                    auction.item.name + '</span>.',
+                                net: -auction.price,
+                                balance: game.wallet
+                            });
+                        });
+                    game.bind('AuctionSold', function (auction)
+                        {
+                            addTransaction({
+                                description: 'Sold <span class="item_display">' +
+                                    auction.item.name + '</span>.',
+                                net: auction.price,
+                                balance: game.wallet
+                            });
+                        });
                 });
-                game.bind('AuctionSold', function (auction)
-                {
-                    addTransaction({
-                        description: 'Sold <span class="item_display">' +
-                            auction.item.name + '</span>.',
-                        net: auction.price,
-                        balance: game.wallet
-                    });
-                });
-            });
             
             $.get('/js/templates/auctions_list.htm', {}, function (data)
-            {
-                $.template('auctions_list', data);
-                showSellTabItems(game.auctionsMine);
-                
-                $.get('/js/templates/buy_item_page.htm', {}, function (data)
                 {
-                    $.template('buy_item_page', data);
-                    showBuyTabItems(game.auctionsWorld);
+                    $.template('auctions_list', data);
+                    showSellTabItems(game.auctionsMine);
                     
-                    game.bind('AuctionAdded', function (item)
+                    $.get('/js/templates/buy_item_page.htm', {}, function (data)
                     {
+                        $.template('buy_item_page', data);
                         showBuyTabItems(game.auctionsWorld);
-                        showSellTabItems(game.auctionsMine);
-                    });
-                    game.bind('ItemBought', function (auction)
-                    {
-                        showBuyTabItems(game.auctionsWorld);
-                        $('#tab_buying a.back').click();
                         
-                        addNotification('Bought <span class="item_display">' +
-                            auction.item.name + '</span> for <span class="money">$' +
-                            currency(auction.price) + '</span>.', 'tab_inventory');
-                    });
-                    game.bind('AuctionSold', function (auction)
-                    {
-                        showSellTabItems(game.auctionsMine);
-                        
-                        addNotification('Sold <span class="item_display">' +
-                            auction.item.name + '</span> for <span class="money">$' +
-                            currency(auction.price) + '</span>.');
+                        game.bind('AuctionAdded', function (item)
+                            {
+                                showBuyTabItems(game.auctionsWorld);
+                                showSellTabItems(game.auctionsMine);
+                            });
+                        game.bind('ItemBought', function (auction)
+                            {
+                                showBuyTabItems(game.auctionsWorld);
+                                $('#tab_buying a.back').click();
+                                
+                                addNotification('Bought <span class="item_display">' +
+                                    auction.item.name + '</span> for <span class="money">$' +
+                                    currency(auction.price) + '</span>.', 'tab_selling');
+                            });
+                        game.bind('AuctionSold', function (auction)
+                            {
+                                showSellTabItems(game.auctionsMine);
+                                
+                                addNotification('Sold <span class="item_display">' +
+                                    auction.item.name + '</span> for <span class="money">$' +
+                                    currency(auction.price) + '</span>.');
+                            });
                     });
                 });
-            });
             
             $.get('/js/templates/tab_inventory.htm', {}, function (data)
-            {
-                $.template('tab_inventory', data);
-                $.get('/js/templates/create_auction_dialog.htm', {}, function (data)
                 {
-                    $.template('create_auction_dialog', data);
-                    showInventoryTabItems(game.inventory);
-                    
-                    game.bind('InventoryItemAdded', function (item)
+                    $.template('tab_inventory', data);
+                    $.get('/js/templates/create_auction_dialog.htm', {}, function (data)
                     {
-                      showInventoryTabItems(game.inventory);
-                    });
-                    game.bind('InventoryItemRemoved', function (item)
-                    {
-                      showInventoryTabItems(game.inventory);
+                        $.template('create_auction_dialog', data);
+                        showInventoryTabItems(game.inventory);
+                        
+                        game.bind('InventoryItemAdded', function (item)
+                            {
+                              showInventoryTabItems(game.inventory);
+                            });
+                        game.bind('InventoryItemRemoved', function (item)
+                            {
+                              showInventoryTabItems(game.inventory);
+                            });
                     });
                 });
-            });
             
             game.bind('AchievementUnlocked', function(m)
-            {
-                if (m.name.substring(0,4) == 'Cash')
                 {
-                    var amount = m.name.substring(4);
-                    addAchievement('Reached <span class="money">$' + currency(new Number(amount)) +
-                        '</span> in your wallet!');
-                }
+                    if (m.name.substring(0,4) == 'Cash')
+                    {
+                        var amount = m.name.substring(4);
+                        addAchievement('Reached <span class="money">$' + currency(new Number(amount)) +
+                            '</span> in your wallet!');
+                    }
+                });
+            
+            // Setup event post hooks
+            game.bind('ItemBought', function(m)
+            {
+                events.addEvent('ItemBought', m);
             });
+            game.bind('AuctionSold', function(m)
+            {
+                events.addEvent('AuctionSold', m);
+            });
+            
+            // Setup the timer
+            setTimer(_timeLeft);
+            var timer = setInterval(function()
+                {
+                    if (_timeLeft <= 0)
+                    {
+                        clearInterval(timer);
+                        endGame();
+                    }
+                    
+                    setTimer(_timeLeft--);
+                }, 1000);
             
             // Send a "began game" event to the server
             events.addEvent("Began game", {});

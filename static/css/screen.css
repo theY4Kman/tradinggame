@@ -84,13 +84,28 @@ body {
   padding-left: 0;
 }
 
+/* Timer */
+#timer {
+  color: black;
+  background: #F0FFF0 url(../img/stopwatch.png) no-repeat 5px center;
+  font-size: 1.4em;
+  letter-spacing: 2px;
+  margin-left: 10px;
+  margin-top: 20px;
+  min-height: 15px;
+  padding: 6px 10px;
+  text-align: center;
+  width: 110px;
+}
+#timer div { margin-left: 24px; }
+
 /* Wallet */
 #wallet {
   background-color: #4B67A1;
   font-size: 0.6em;
-  margin-left: 1em;
+  margin-left: 10px;
   margin-top: 2em;
-  padding: 1em 10px;
+  padding: 10px 10px;
   text-align: center;
   width: 110px;
 }
@@ -106,9 +121,9 @@ body {
 .ui-tabs .ui-tabs-nav li.notification {
   background-color: #4B67A1;
   font-size: 0.6em;
-  margin-left: 1em;
+  margin-left: 10px;
   margin-top: 1em;
-  padding: 1em 10px;
+  padding: 10px 10px;
   white-space: normal;
   width: 110px;
 }
