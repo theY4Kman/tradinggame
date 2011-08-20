@@ -52,6 +52,7 @@ def startapp(args):
         db.set('id_counter', 1)
     
     
+    # Returns a URL ID based on a counter stored in the database
     def get_next_url():
         if not db.exists('next_url_id'):
             db.set('next_url_id', 0)
@@ -60,8 +61,18 @@ def startapp(args):
         
         return ('%08x' % crc32(app.secret_key + url_id)).replace('-', '')
     
-    def add_next_url(user):
-        db.sadd('url_ids', get_next_url())
+    # Adds, or generates and adds, an ID to the list of unactivated IDs
+    def add_next_url(id=None):
+        if id is None:
+            id = get_next_url()
+        db.sadd('url_ids', id)
+    
+    # Clear the URL IDs from the URL ID lists. If `used_only` is True, only the
+    # activated URL IDs are removed.
+    def clear_urls(used_only=True):
+        if not used_only:
+            db.sdiffstore('url_ids', 'url_ids', 'url_ids')
+        db.sdiffstore('used_url_ids', 'used_url_ids', 'used_url_ids')
     
     def gen_url_csv():
         if not db.exists('url_ids'):

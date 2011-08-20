@@ -269,8 +269,6 @@ function addNotification(html, tab, achievement)
             $('li.notification').slideUp(function () { $(this).remove(); });
         });
         clear.appendTo('#tab_select');
-        
-        elem.addClass('first');
     }
     
     if (tab != undefined)
@@ -295,7 +293,10 @@ function addNotification(html, tab, achievement)
     else
         elem.html(html);
     
-    elem.appendTo('#tab_select');
+    $('li.notification').removeClass('first');
+    elem.addClass('first');
+    
+    elem.insertAfter('#clear_notifications');
     elem.effect('highlightnobgchange', {}, 1000);
     setTimeout(function ()
     {
