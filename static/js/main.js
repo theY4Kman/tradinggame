@@ -15,9 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-require(["/js/jquery-1.6.2.min.js", "game"], jQueryInit);
+require(["/js/jquery-1.6.2.min.js", "game", "net"], jQueryInit);
 
 var game = null;
+var events = null;
 
 function isFloat(str)
 {
@@ -319,10 +320,12 @@ function jQueryInit()
     game.populate();
     window.game = game;
     
+    events = require('net');
+    
     /*if (window.localStorage.game != undefined)
         game.load();*/
     
-    require(["/js/jquery-ui-1.8.14.min.js", "/js/jquery.tmpl.min.js", "/js/jConf-1.2.0.js", '/js/net.js'], function ()
+    require(["/js/jquery-ui-1.8.14.min.js", "/js/jquery.tmpl.min.js", "/js/jConf-1.2.0.js"], function ()
     {
         $(function()
         {
@@ -473,6 +476,9 @@ function jQueryInit()
                         '</span> in your wallet!');
                 }
             });
+            
+            // Send a "began game" event to the server
+            events.addEvent("Began game", {});
         });
     });
     

@@ -34,7 +34,7 @@ def startapp(args):
     global get_next_url, add_next_url
     
     app = flask.Flask(__name__, static_url_path='/')
-    app.debug=True
+    app.debug = True
     app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
         '/': os.path.join(base, 'static')})
 
@@ -60,20 +60,18 @@ def startapp(args):
     
     @app.route('/')
     def index(**kwargs):
-        return flask.redirect('/index.htm')
+        with open(os.path.join(base, 'static', 'index.htm'), 'r') as fp:
+            return fp.read()
     
     @app.route('/post/', methods=['POST'])
     def post():
-        if not (request.form.has_key('event') or
-            not request.form.has_key('data') or
-            not request.form.has_key('id')):
-            return 500
+        if not flask.request.form.has_key('events'):
+            return 'BAD',500
         
-        id = request.form['id']
-        name = request.form['event']
-        data = request.form['data']
+        events = json.loads(flask.request.form['events'])
+        for event in events:
+            db.lpush('%s:log' % id, json.dumps(event))
         
-        db.lpush('%s:log' % id, json.dumps({ 'name': name, 'data': data }))
         return 'OK'
     
     
@@ -83,7 +81,6 @@ def startapp(args):
         if not db.sismember('url_ids', id) and not db.exists('%s:log' % id):
             return '', 404
         
-        db.lpush('%s:log' % id, 'Began game.')
         with open(os.path.join(base, 'static', 'index.htm'), 'r') as fp:
             return fp.read()
 

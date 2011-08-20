@@ -1,38 +1,84 @@
-require(["/js/jquery-ui-1.8.14.min.js"], function()
+define(["/js/jquery-ui-1.8.14.min.js"], function()
 {
-    $(function()
+    /**
+     * This class keeps a queue of events that need to be sent to the server.
+     * The queue of events gets sent when the queue reaches `max_queue` events,
+     * or if `max_seconds` passes, whichever comes first. This is to cut down on
+     * server load and for clients where internets is terrible.
+     */
+    function EventPoster()
     {
-        var game = window.game;
-        var events = [
-            'AuctionRemoved',
-            'InventoryItemAdded',
-            'ItemBought',
-            'WalletChanged',
-            'AuctionAdded',
-            'InventoryItemRemoved',
-            'AuctionSold',
-            'AchievementUnlocked', ''];
+        this.queue = [];
+        this._queue = [];
+        this.urlid = null;
         
-        var rgx = /\/post\/([a-f0-9]+)\//;
+        this.max_queue = 20;
+        this.max_seconds = 60; // Every minute
+        
+        /* Make sure we have a URL ID */
+        var rgx = /\/play\/([a-f0-9]+)\//;
         var uri = window.location.pathname;
+        if (window.location.pathname != window.parent.location.pathname)
+            uri = window.parent.location.pathname;
         
         var match = rgx.exec(uri)
-        if (match == null)
+        if (match != null)
+            this.urlid = match[1];
+        else
             return;
         
-        id = match[1];
+        this.timer = setTimeout(this.sendQueue, this.max_seconds * 1000);
+    }
+    
+    EventPoster.prototype.sendQueue = function()
+    {
+        if (this.urlid == null)
+            return false;
         
-        events.each(function(k, name)
-        {
-            game.bind(name, function(evt)
+        if (this.queue.length == 0)
+            return false;
+        
+        // Copy the queue to a temporary one, so if the request fails, we can
+        // re-add them to the queue.
+        this._queue = this.queue.slice();
+        this.queue = [];
+        
+        var events = this;
+        
+        jQuery.post('/post/', { 'events': JSON.stringify(this._queue) }, function()
             {
-                jQuery.post('/post/',
-                {
-                    'name': name,
-                    'data': evt,
-                    'id': id
-                });
+                clearTimeout(events.timer);
+                events.timer = setTimeout(events.sendQueue,
+                    events.max_seconds * 1000);
             })
+        .error(function()
+            {
+                // Prepend _queue to queue
+                events._queue.concat(events.queue);
+                events.queue = events._queue;
+                events._queue = [];
+            });
+        
+        return true;
+    }
+    
+    EventPoster.prototype.addEvent = function(name, data)
+    {
+        if (this.urlid == null)
+            return false;
+        
+        this.queue.push({
+            'name': name,
+            'data': data,
+            'time': parseInt(new Date().getTime() / 1000)
         });
-    });
+        
+        if (this.queue.length >= this.max_queue)
+            this.sendQueue();
+        
+        return true;
+    }
+    
+    var poster = new EventPoster();
+    return poster;
 });
