@@ -444,7 +444,8 @@ function jQueryInit()
             $.get('/js/templates/auctions_list.htm', {}, function (data)
                 {
                     $.template('auctions_list', data);
-                    showSellTabItems(game.auctionsMine);
+                    showSellTabItems
+(game.auctionsMine);
                     
                     $.get('/js/templates/buy_item_page.htm', {}, function (data)
                     {

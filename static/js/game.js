@@ -1,5 +1,15 @@
 // Singleton game object
-define(['/js/microevent.js'], function () {
+define(['/js/microevent.js', '/js/sorted_item_list.js'], function () {
+
+    var sorteditems = [];
+    for (var i = 0; i < sorted_item_list.length; i++) {
+        var v = sorted_item_list[i];
+        sorteditems.push({img: v.imageurl,
+                          value: parseFloat(v.price),
+                          name: v.title,
+                         });
+    }
+
     var config = {
         rate_newitems: 0.01, // 100 seconds per item?
         rate_buy: 0.02, // FIXME this is a dumb parameter, replace with market model
@@ -28,17 +38,17 @@ define(['/js/microevent.js'], function () {
     }
     
     var achievements = {
-        'Cash1200': achievement_cash(1200),
-        'Cash2000': achievement_cash(2000),
-        'Cash5000': achievement_cash(5000),
+        'Cash500': achievement_cash(500),
+        'Cash1000': achievement_cash(1000),
+        'Cash1500': achievement_cash(1500),
     };
 
     var items = [
-        {img: 'img/cupcake.jpg', name: 'Cupcake', value: 2.0},
-        {img: 'img/muffler.jpg', name: 'Muffler', value: 230.0},
-        {img: 'img/textbook.jpg', name: 'Textbook', value: 100.0},
-        {img: 'img/car.jpg', name: 'Car', value: 12000.0},
-        {img: 'img/ps3.jpg', name: 'PS3', value: 500.0},
+        {img: '/img/cupcake.jpg', name: 'Cupcake', value: 2.0},
+        {img: '/img/muffler.jpg', name: 'Muffler', value: 230.0},
+        {img: '/img/textbook.jpg', name: 'Textbook', value: 100.0},
+        {img: '/img/car.jpg', name: 'Car', value: 12000.0},
+        {img: '/img/ps3.jpg', name: 'PS3', value: 500.0},
     ];
 
     var sellers = {
@@ -84,7 +94,7 @@ define(['/js/microevent.js'], function () {
         this.auctionsWorld = {};
         this.auctionsMine = {};
         this.timestamp = new Date().getTime();
-        this.wallet = 1000.0;
+        this.wallet = 20.00;
         this.nyms = {
             'NymA': {id:'NymA', ratings:{pos: 1, neg:2}},
             'NymB': {id:'NymB', ratings:{pos: 1, neg:2}},
@@ -113,10 +123,6 @@ define(['/js/microevent.js'], function () {
 
     Game.prototype.newAuctionWorld = function (networth) {
         networth = networth || this.wallet;
-        // Create a clone of an item with a unique key
-        var item = Object.create(choice(items));
-        item.id = randomString(20);
-        var seller = choice(sellers);
 
         // fixme: add either A) a normal distribution here, 
         // or B) a sampling based on a buy/sell volume curve
@@ -124,6 +130,21 @@ define(['/js/microevent.js'], function () {
         //var price = item.value * (1+(Math.random()*2-1)*0.1);
         var price = networth * factor;
         price = Math.round(price*100)/100;
+
+        function pricechoice(items, price) {
+            for (var i = 1; i < items.length; i++) {
+                if (items[i].value > price)
+                    return items[i-1];
+            }
+            return items[0];
+        }
+
+        //var item = Object.create(choice(items));
+        // Create a clone of an item with a unique key
+        var item = Object.create(pricechoice(sorteditems, price));
+        item.id = randomString(20);
+
+        var seller = choice(sellers);
 
         var auction = {
             id: randomString(20),
