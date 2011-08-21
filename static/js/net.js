@@ -32,10 +32,26 @@ define(["/js/jquery-ui-1.8.14.min.js"], function()
     
     EventPoster.prototype.sendQueue = function(redirect)
     {
+        function finish_redirect() {
+            if (redirect)
+                setTimeout(function()
+                           {
+                               if (window.location.href != window.parent.location.href)
+                                   window.parent.location.href = redirect;
+                               else
+                                   window.location.href = redirect;
+                           }, 5*1000);
+            else
+                events.timer = setTimeout(events.sendQueue,
+                                          events.max_seconds * 1000);
+        }
+
         if (this.urlid == null)
+            finish_redirect();
             return false;
         
         if (this.queue.length == 0)
+            finish_redirect();
             return false;
         
         // Copy the queue to a temporary one, so if the request fails, we can
@@ -53,18 +69,7 @@ define(["/js/jquery-ui-1.8.14.min.js"], function()
         jQuery.post('/post/', data, function()
             {
                 clearTimeout(events.timer);
-                
-                if (redirect)
-                    setTimeout(function()
-                        {
-                            if (window.location.href != window.parent.location.href)
-                                window.parent.location.href = redirect;
-                            else
-                                window.location.href = redirect;
-                        }, 5*1000);
-                else
-                    events.timer = setTimeout(events.sendQueue,
-                        events.max_seconds * 1000);
+                finish_redirect();
             })
         .error(function()
             {
