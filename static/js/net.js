@@ -13,7 +13,7 @@ define(["/js/jquery-ui-1.8.14.min.js"], function()
         this.urlid = null;
         
         this.max_queue = 20;
-        this.max_seconds = 60; // Every minute
+        this.max_seconds = 30; // Every 30 seconds
         
         /* Make sure we have a URL ID */
         var rgx = /\/play\/([a-f0-9]+)\//;
@@ -26,33 +26,35 @@ define(["/js/jquery-ui-1.8.14.min.js"], function()
             this.urlid = match[1];
         else
             return;
-        
-        this.timer = setTimeout(this.sendQueue, this.max_seconds * 1000);
+
+        var self = this;
+        this.timer = setTimeout(function () { 
+            self.sendQueue(); 
+        }, this.max_seconds * 1000);
     }
     
     EventPoster.prototype.sendQueue = function(redirect)
     {
-        function finish_redirect() {
-            if (redirect)
-                setTimeout(function()
-                           {
-                               if (window.location.href != window.parent.location.href)
-                                   window.parent.location.href = redirect;
-                               else
-                                   window.location.href = redirect;
-                           }, 5*1000);
-            else
-                events.timer = setTimeout(events.sendQueue,
-                                          events.max_seconds * 1000);
+        function do_redirect() {
+            setTimeout(function()
+                       {
+                           if (window.location.href != window.parent.location.href)
+                               window.parent.location.href = redirect;
+                           else
+                               window.location.href = redirect;
+                       }, 5*1000);
         }
 
-        if (this.urlid == null)
-            finish_redirect();
+        if (this.urlid == null) {
+            if (redirect) do_redirect();
             return false;
+        }
         
-        if (this.queue.length == 0)
-            finish_redirect();
+        if (this.queue.length == 0) {
+            if (redirect) do_redirect();
             return false;
+        }
+        console.info('entered post')
         
         // Copy the queue to a temporary one, so if the request fails, we can
         // re-add them to the queue.
@@ -69,7 +71,12 @@ define(["/js/jquery-ui-1.8.14.min.js"], function()
         jQuery.post('/post/', data, function()
             {
                 clearTimeout(events.timer);
-                finish_redirect();
+                
+                if (redirect)
+                    do_redirect();
+                else
+                    events.timer = setTimeout(function () { events.sendQueue() },
+                        events.max_seconds * 1000);
             })
         .error(function()
             {
