@@ -38,9 +38,9 @@ define(['/js/microevent.js', '/js/sorted_item_list.js'], function () {
     }
     
     var achievements = {
-        'Cash500': achievement_cash(500),
+        'Cash50': achievement_cash(50),
+        'Cash100': achievement_cash(100),
         'Cash1000': achievement_cash(1000),
-        'Cash1500': achievement_cash(1500),
     };
 
     var items = [
@@ -143,6 +143,7 @@ define(['/js/microevent.js', '/js/sorted_item_list.js'], function () {
         // Create a clone of an item with a unique key
         var item = Object.create(pricechoice(sorteditems, price));
         item.id = randomString(20);
+        item.value = price * 1.3;
 
         var seller = choice(sellers);
 
@@ -281,7 +282,7 @@ define(['/js/microevent.js', '/js/sorted_item_list.js'], function () {
         this.buyItem(auction.id);
         // Sell it right away at 10% markup
         var item = auction.item;
-        this.createAuction(item.id, item.value * 1.1);
+        this.createAuction(item.id, item.value * 1.0);
     }
 
     MicroEvent.mixin(Game);
