@@ -30,9 +30,10 @@ app = None
 db = None
 base = os.path.dirname(__file__)
 
+
 def startapp(args):
     global app, db
-    global get_next_url, add_next_url
+    global get_next_url, add_next_url, add_urls, gen_url_csv
     
     app = flask.Flask(__name__, static_url_path='/')
     app.debug = True
@@ -161,7 +162,7 @@ if __name__ == '__main__':
     startapp(args)
 
     print 'Serving on port', args.port
-    if app.debug:
+    if app.debug and 0:
         app.run('0.0.0.0', args.port)
     else:
         http_server = WSGIServer(('', args.port), app)
