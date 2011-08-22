@@ -3,9 +3,9 @@
             <tr>
               <th class="img"></th>
               <th class="name">Name</th>
-              <th class="value">Market Value</th>
               <th class="price">Price</th>
               <th class="ratings">Seller Ratings</th>
+              <th class="value">Market Value</th>
             </tr>
           </thead>
           <tbody>{{if items.length}}{{each items}}
@@ -16,9 +16,9 @@
                 </a>
               </td>
               <td class="name">${item.name}</td>
-              <td class="price">$${parseFloat(item.value).toFixed(2)}</td>
               <td class="price">$${parseFloat(price).toFixed(2)}</td>
               <td class="ratings"><span class="rating"><span class="positive">${seller.ratings.pos}<img src="/img/green_arrow.png" /></span> <span class="negative">${seller.ratings.neg}<img src="/img/red_arrow.png" /></span></span></td>
+              <td class="price">$${parseFloat(item.value).toFixed(2)}</td>
             </tr>{{/each}}{{/if}}
           </tbody>
         </table>

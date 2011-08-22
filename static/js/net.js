@@ -54,7 +54,6 @@ define(["/js/jquery-ui-1.8.14.min.js"], function()
             if (redirect) do_redirect();
             return false;
         }
-        console.info('entered post')
         
         // Copy the queue to a temporary one, so if the request fails, we can
         // re-add them to the queue.

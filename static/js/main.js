@@ -331,6 +331,7 @@ function setTimer(seconds)
 /* Finishes the game and sends the user to the end page */
 function endGame()
 {
+    game.end();
     addNotification('Game over! Thanks for playing.');
     window.localStorage['wallet'] = game.wallet;
     
