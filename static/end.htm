@@ -9,6 +9,8 @@
             {
                 document.getElementById('money').innerHTML = '$' +
                     (new Number(window.localStorage.getItem("wallet"))).toFixed(2);
+                document.getElementById('confirmationcode').innerHTML = 
+                     window.localStorage.getItem('urlid');
             }, false);
     </script>
   </head>
@@ -17,7 +19,7 @@
       <h2>You've completed the game with <span id="money" class="money">$20.00.</span></h2>
       <h3>That's a new record. Great job!</h3>
       <h5>Please paste the following code into the Mechanical Turk to complete the survey:</h5>
-      <h2>bHj73XIQ</h2>
+      <h2 id="confirmationcode"></h2>
     </div>
   </body>
 </html>
