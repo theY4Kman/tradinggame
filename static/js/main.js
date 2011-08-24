@@ -334,6 +334,7 @@ function endGame()
     game.end();
     addNotification('Game over! Thanks for playing.');
     window.localStorage['wallet'] = game.wallet;
+    window.localStorage['urlid'] = events.urlid;
     
     $('#timer').css('background-color', '#CD2626');
     $('#timer').effect('highlightnobgchange', {}, 1000);
@@ -348,6 +349,16 @@ function jQueryInit()
     game = require('game');
     game.populate();
     window.game = game;
+
+    try {
+        window.localStorage.test = 'TEST123';
+        if (!window.localStorage.test == 'TEST123') {
+            throw("No local storage");
+        }
+    } catch (e) {
+        alert("HTML5 local storage isn't supported in your browser. This game won't work.");
+        return;
+    }
     
     events = require('net');
     
