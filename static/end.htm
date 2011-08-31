@@ -7,8 +7,9 @@
     <script>
         addEventListener('load', function()
             {
-                document.getElementById('money').innerHTML = '$' +
-                    (new Number(window.localStorage['wallet'])).toFixed(2);
+                if (window.localStorage['wallet'])
+                    document.getElementById('money').innerHTML = '$' +
+                        (new Number(window.localStorage['wallet'])).toFixed(2);
             });
     </script>
   </head>
