@@ -30,9 +30,16 @@ app = None
 db = None
 base = os.path.dirname(__file__)
 
+
+def all_events():
+    ids = db.smembers('used_url_ids')
+    events = dict([(id, db.lrange('%s:log' % id, 0, -1)) for id in ids])
+    return events
+
+
 def startapp(args):
     global app, db
-    global get_next_url, add_next_url
+    global get_next_url, add_next_url, add_urls, gen_url_csv, clear_urls
     
     app = flask.Flask(__name__, static_url_path='/')
     app.debug = True
@@ -89,18 +96,19 @@ def startapp(args):
     def csv(filename='urls.csv'):
         if app.debug is False:
             return '',404
-        
+
         return gen_url_csv()
     
     @app.route('/')
     def index(**kwargs):
-        with open(os.path.join(base, 'static', 'index.htm'), 'r') as fp:
-            return fp.read()
+        url = get_next_url()
+        add_next_url(url)
+        return flask.redirect('/play/'+url)
     
     @app.route('/post/', methods=['POST'])
     def post():
-        if not flask.request.form.has_key('events') or \
-            not flask.request.form.has_key('id'):
+        if (not 'events' in flask.request.form or
+            not 'id' in flask.request.form):
             return 'BAD',500
         
         id = flask.request.form['id']
@@ -161,7 +169,7 @@ if __name__ == '__main__':
     startapp(args)
 
     print 'Serving on port', args.port
-    if app.debug:
+    if app.debug and 0:
         app.run('0.0.0.0', args.port)
     else:
         http_server = WSGIServer(('', args.port), app)

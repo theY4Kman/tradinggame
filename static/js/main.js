@@ -331,8 +331,10 @@ function setTimer(seconds)
 /* Finishes the game and sends the user to the end page */
 function endGame()
 {
+    game.end();
     addNotification('Game over! Thanks for playing.');
     window.localStorage['wallet'] = game.wallet;
+    window.localStorage['urlid'] = events.urlid;
     
     $('#timer').css('background-color', '#CD2626');
     $('#timer').effect('highlightnobgchange', {}, 1000);
@@ -347,6 +349,16 @@ function jQueryInit()
     game = require('game');
     game.populate();
     window.game = game;
+
+    try {
+        window.localStorage.test = 'TEST123';
+        if (!window.localStorage.test == 'TEST123') {
+            throw("No local storage");
+        }
+    } catch (e) {
+        alert("HTML5 local storage isn't supported in your browser. This game won't work.");
+        return;
+    }
     
     events = require('net');
     
@@ -444,7 +456,8 @@ function jQueryInit()
             $.get('/js/templates/auctions_list.htm', {}, function (data)
                 {
                     $.template('auctions_list', data);
-                    showSellTabItems(game.auctionsMine);
+                    showSellTabItems
+(game.auctionsMine);
                     
                     $.get('/js/templates/buy_item_page.htm', {}, function (data)
                     {
